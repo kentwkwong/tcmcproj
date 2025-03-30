@@ -9,6 +9,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/record", records);
 app.use("/users", users);
+app.get("/", (req, res)=>res.send("eXpress on testing"));
 
 app.listen(PORT, () => {
     console.log('Server listening on port ${PORT}');
