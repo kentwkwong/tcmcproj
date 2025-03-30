@@ -18,3 +18,5 @@ app.get("/test", (req, res)=>res.send("on9 testing"));
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
 })
+
+export default app;
