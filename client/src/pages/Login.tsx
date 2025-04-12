@@ -1,5 +1,5 @@
-import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import axios from "axios";
+// import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+// import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
@@ -29,23 +29,23 @@ type FormData = yup.InferType<typeof schema>;
 const Login = () => {
   const { user, login } = useAuth();
   const navigate = useNavigate();
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+  //   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
-  const handleLogin = async (credentialResponse: any) => {
-    try {
-      const res = await axios.post(
-        import.meta.env.VITE_API_URL + "/api/auth/google",
-        { credential: credentialResponse.credential },
-        { withCredentials: true }
-      );
-      if (res.data.success) {
-        console.log(res.data);
-        window.location.href = "/dashboard"; // reload to trigger context fetch
-      }
-    } catch (err) {
-      console.error("Login failed:", err);
-    }
-  };
+  //   const handleLogin = async (credentialResponse: any) => {
+  //     try {
+  //       const res = await axios.post(
+  //         import.meta.env.VITE_API_URL + "/api/auth/google",
+  //         { credential: credentialResponse.credential },
+  //         { withCredentials: true }
+  //       );
+  //       if (res.data.success) {
+  //         console.log(res.data);
+  //         window.location.href = "/dashboard"; // reload to trigger context fetch
+  //       }
+  //     } catch (err) {
+  //       console.error("Login failed:", err);
+  //     }
+  //   };
 
   useEffect(() => {
     if (user) {

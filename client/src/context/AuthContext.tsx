@@ -11,15 +11,13 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const apiurl = import.meta.env.VITE_API_URL || "";
   const [user, setUser] = useState<User | null>(null);
 
   const login = () => {
-    //window.open(`${apiurl}/api/auth/google`, "_self");
     if (!window.google?.accounts?.id) return;
 
     window.google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      client_id: import.meta.env.VITE_API_URL,
       callback: async (response: any) => {
         try {
           const res = await axios.post(

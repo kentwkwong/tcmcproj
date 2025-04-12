@@ -6,10 +6,6 @@ import {
   Typography,
   Box,
   Button,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
   Avatar,
   Menu,
   MenuItem,
@@ -17,11 +13,9 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { GoogleLogin } from "@react-oauth/google";
-import axios from "axios";
 
 const Navbar: React.FC = () => {
-  const { user, login, logout } = useAuth();
+  const { user, logout } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -29,22 +23,6 @@ const Navbar: React.FC = () => {
   const handleMenu = (e: React.MouseEvent<HTMLElement>) =>
     setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
-
-  const handleLogin = async (credentialResponse: any) => {
-    try {
-      const res = await axios.post(
-        import.meta.env.VITE_API_URL + "/api/auth/google",
-        { credential: credentialResponse.credential },
-        { withCredentials: true }
-      );
-      if (res.data.success) {
-        console.log(res.data);
-        // window.location.href = "/profile"; // reload to trigger context fetch
-      }
-    } catch (err) {
-      console.error("Login failed:", err);
-    }
-  };
 
   const navLinks = [
     { label: "Home", path: "/" },
@@ -61,7 +39,7 @@ const Navbar: React.FC = () => {
               edge="start"
               color="inherit"
               sx={{ display: { sm: "none" } }}
-              onClick={toggleDrawer(true)}
+              onClick={toggleDrawer(drawerOpen)}
             >
               <MenuIcon />
             </IconButton>
