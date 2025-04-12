@@ -14,10 +14,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
   const login = () => {
+    console.log("cp1");
     if (!window.google?.accounts?.id) return;
 
     window.google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_API_URL,
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
       callback: async (response: any) => {
         try {
           const res = await axios.post(
@@ -25,6 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             { credential: response.credential },
             { withCredentials: true }
           );
+          console.log("cp2");
           if (res.data?.success) {
             fetchUser(); // Refresh user state
           }

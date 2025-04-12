@@ -20,19 +20,21 @@ app.use(cors({
 app.use("/record", records);
 app.use("/users", users);
 app.get("/", (req, res)=>res.send("eXpress on testing"));
-app.get("/test", (req, res)=>res.send("on9 testing"));
+app.get("/on9test", (req, res)=>{
+  res.send("on9 testing")
+  console.log("CORS origin allowed:", process.env.FRONTEND_ORIGIN);
+});
 
 
 // Google Login Route
 app.post("/api/auth/google", async (req, res) => {
-    const { credential } = req.body;
+
+  const { credential } = req.body;
     if (!credential) return res.status(400).json({ error: "Missing credential" });
     try {
+     
       const googleRes = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
       const { email, name, picture, sub } = googleRes.data;
-
-      console.log("server: cp");
-      console.log(googleRes.data);
 
       const token = jwt.sign({ email, name, picture, sub }, process.env.JWT_SECRET, {
         expiresIn: "1h",
@@ -40,8 +42,8 @@ app.post("/api/auth/google", async (req, res) => {
   
       res.cookie("accessToken", token, {
         httpOnly: true,
-        secure: false, // Set to true in production (HTTPS)
-        sameSite: "lax",
+        secure: process.env.ENVIRONMENT === 'production',
+        sameSite: process.env.SAME_SITE,
         maxAge: 60 * 60 * 1000, // 1 hour
       });
   

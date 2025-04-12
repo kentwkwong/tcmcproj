@@ -49,7 +49,7 @@ const Navbar: React.FC = () => {
               to="/"
               sx={{ color: "white", textDecoration: "none" }}
             >
-              MyApp
+              TCMC Portal
             </Typography>
           </Box>
 
