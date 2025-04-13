@@ -14,7 +14,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
   const login = () => {
-    console.log("cp1");
     if (!window.google?.accounts?.id) return;
 
     window.google.accounts.id.initialize({
@@ -26,7 +25,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             { credential: response.credential },
             { withCredentials: true }
           );
-          console.log("cp2");
           if (res.data?.success) {
             fetchUser(); // Refresh user state
           }
@@ -34,8 +32,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           console.error("Google login error", err);
         }
       },
-      ux_mode: "popup",
-      auto_select: true,
+      ux_mode: "redirect",
+      login_uri: `${import.meta.env.VITE_API_URL}/api/auth/google`,
       cancel_on_tap_outside: false,
     });
     window.google.accounts.id.prompt();

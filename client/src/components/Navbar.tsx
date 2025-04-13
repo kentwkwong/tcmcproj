@@ -34,7 +34,7 @@ const Navbar: React.FC = () => {
     <>
       <AppBar position="fixed">
         <Toolbar sx={{ justifyContent: "space-between" }}>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <IconButton
               edge="start"
               color="inherit"
@@ -43,14 +43,26 @@ const Navbar: React.FC = () => {
             >
               <MenuIcon />
             </IconButton>
-            <Typography
-              variant="h6"
+
+            <Box
               component={Link}
               to="/"
-              sx={{ color: "white", textDecoration: "none" }}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                textDecoration: "none",
+                color: "inherit",
+              }}
             >
-              TCMC Portal
-            </Typography>
+              <Box
+                component="img"
+                src="/tcmc_icon.png"
+                alt="TCMC Logo"
+                sx={{ width: 32, height: 32 }}
+              />
+              <Typography variant="h6">TCMC Portal</Typography>
+            </Box>
           </Box>
 
           <Box sx={{ display: { xs: "none", sm: "flex" }, gap: 2 }}>
@@ -67,22 +79,41 @@ const Navbar: React.FC = () => {
           </Box>
 
           {!user ? (
-            // <GoogleLogin
-            //   onSuccess={(response) => {
-            //     console.log("test cp1");
-            //     handleLogin(response);
-            //     console.log("test cp2");
-            //     console.log(response.credential);
-            //   }}
-            //   onError={() => console.error("Login Failed")}
-            // />
             <Box></Box>
           ) : (
+            // <Box>
+            //   <IconButton onClick={handleMenu}>
+            //     <Avatar src={user.picture} />
+            //   </IconButton>
+            //   <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={handleClose}>
+            //     <MenuItem
+            //       onClick={() => {
+            //         handleClose();
+            //         logout();
+            //       }}
+            //     >
+            //       Logout
+            //     </MenuItem>
+            //   </Menu>
+            // </Box>
+
             <Box>
               <IconButton onClick={handleMenu}>
                 <Avatar src={user.picture} />
               </IconButton>
-              <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={handleClose}>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+              >
+                <MenuItem component={Link} to="/profile" onClick={handleClose}>
+                  Profile
+                </MenuItem>
+                <MenuItem component={Link} to="/settings" onClick={handleClose}>
+                  Settings
+                </MenuItem>
                 <MenuItem
                   onClick={() => {
                     handleClose();
@@ -96,30 +127,6 @@ const Navbar: React.FC = () => {
           )}
         </Toolbar>
       </AppBar>
-
-      {
-        // <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
-        //   <Box sx={{ width: 250 }} onClick={toggleDrawer(false)}>
-        //     <List>
-        //       {navLinks.map((link) => (
-        //         <ListItem
-        //           button
-        //           component={Link}
-        //           to={link.path}
-        //           key={link.path}
-        //         >
-        //           <ListItemText primary={link.label} />
-        //         </ListItem>
-        //       ))}
-        //       {user && (
-        //         <ListItem button onClick={logout}>
-        //           <ListItemText primary="Logout" />
-        //         </ListItem>
-        //       )}
-        //     </List>
-        //   </Box>
-        // </Drawer>
-      }
     </>
   );
 };
