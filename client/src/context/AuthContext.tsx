@@ -15,7 +15,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = () => {
     if (!window.google?.accounts?.id) return;
-
     window.google.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
       callback: async (response: any) => {
@@ -32,8 +31,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           console.error("Google login error", err);
         }
       },
-      ux_mode: "redirect",
-      login_uri: `${import.meta.env.VITE_API_URL}/api/auth/google`,
+      ux_mode: "popup",
+      // login_uri: `${import.meta.env.VITE_API_URL}/api/auth/google`,
       cancel_on_tap_outside: false,
     });
     window.google.accounts.id.prompt();
