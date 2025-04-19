@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -10,7 +10,7 @@ import Register from "./pages/Register";
 
 const App: React.FC = () => {
   return (
-    <Router>
+    <BrowserRouter>
       <Navbar />
       <Routes>
         <Route path="/" element={<Login />} />
@@ -33,7 +33,7 @@ const App: React.FC = () => {
         />
         <Route path="/about" element={<About />} />
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
 };
 
