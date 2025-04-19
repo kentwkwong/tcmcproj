@@ -13,34 +13,30 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
+  const handleGoogleCredential = async (response: any) => {
+    try {
+      const res = await axios.post(
+        "/users/auth/google",
+        { credential: response.credential },
+        { withCredentials: true }
+      );
+      if (res.data?.success) {
+        fetchUser();
+      }
+    } catch (err) {
+      console.error("Google login error", err);
+    }
+  };
+
   const login = () => {
-    if (!window.google?.accounts?.id) return;
-    window.google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-      callback: async (response: any) => {
-        try {
-          const res = await axios.post(
-            "/api/auth/google",
-            { credential: response.credential },
-            { withCredentials: true }
-          );
-          if (res.data?.success) {
-            fetchUser(); // Refresh user state
-          }
-        } catch (err) {
-          console.error("Google login error", err);
-        }
-      },
-      ux_mode: "popup",
-      // login_uri: `${import.meta.env.VITE_API_URL}/api/auth/google`,
-      cancel_on_tap_outside: false,
-    });
-    window.google.accounts.id.prompt();
+    if (window.google?.accounts?.id) {
+      window.google.accounts.id.prompt();
+    }
   };
 
   const logout = async () => {
     try {
-      await axios.post(`/api/logout`, {}, { withCredentials: true });
+      await axios.post(`/users/logout`, {}, { withCredentials: true });
       setUser(null);
     } catch (err) {
       console.error("AuthContext.logout failed: ", err);
@@ -49,11 +45,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchUser = async () => {
     try {
-      const res = await axios.get(`/api/me`, {
+      const res = await axios.get(`/users/gettoken`, {
         withCredentials: true,
       });
       setUser(res.data.user);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Unexpected error fetching user:", err);
     }
   };
@@ -61,11 +57,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     fetchUser();
 
-    // Load Google Identity Services script on mount
     const script = document.createElement("script");
     script.src = "https://accounts.google.com/gsi/client";
     script.async = true;
     script.defer = true;
+    script.onload = () => {
+      if (window.google?.accounts?.id) {
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredential,
+          ux_mode: "popup",
+          cancel_on_tap_outside: false,
+        });
+      }
+    };
     document.body.appendChild(script);
   }, []);
 

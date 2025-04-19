@@ -4,9 +4,10 @@ import cors from "cors";
 import profiles from "./routes/profiles.js";
 import users from "./routes/users.js";
 import cookieParser from 'cookie-parser';
-import verifyToken from './verifyToken.js';
-import axios from 'axios';
-import jwt from 'jsonwebtoken'
+// import verifyToken from './verifyToken.js';
+// import { authenticateJWT } from './middleware/authMiddleware.js';
+// import axios from 'axios';
+// import jwt from 'jsonwebtoken'
 
 dotenv.config();
 const PORT = process.env.PORT;
@@ -25,69 +26,39 @@ app.get("/on9test", (req, res)=>{
   console.log("CORS origin allowed:", process.env.FRONTEND_ORIGIN);
 });
 
-
-// Google Login Route
 // app.post("/api/auth/google", async (req, res) => {
+//   const {credential} = req.body;
+//   if (!credential) return res.status(400).send("Missing credential");
+//   try {
+//     const googleRes = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+//     const { email, name, picture, sub } = googleRes.data;
+//     const token = jwt.sign({ email, name, picture, sub }, process.env.JWT_SECRET, {
+//       expiresIn: "1h",
+//     });
+//     res.cookie("accessToken", token, {
+//       httpOnly: true,
+//       secure: process.env.ENVIRONMENT === "production",
+//       sameSite: process.env.SAME_SITE || "Lax",
+//       maxAge: 60 * 60 * 1000,
+//     });
 
-//   const { credential } = req.body;
-//     if (!credential) return res.status(400).json({ error: "Missing credential" });
-//     try {
-     
-//       const googleRes = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
-//       const { email, name, picture, sub } = googleRes.data;
+//     res.json({ success: true });
+//   } catch (err) {
+//     console.error("Google login error:", err.message);
+//     res.status(401).json({ error: "Invalid Google token" });}
+// });
 
-//       const token = jwt.sign({ email, name, picture, sub }, process.env.JWT_SECRET, {
-//         expiresIn: "1h",
-//       });
+
+//   // Protected user route
+// app.get("/api/me", authenticateJWT, (req, res) => {
+//     res.json({ user: req.user });
+// });
   
-//       res.cookie("accessToken", token, {
-//         httpOnly: true,
-//         secure: process.env.ENVIRONMENT === 'production',
-//         sameSite: process.env.SAME_SITE,
-//         maxAge: 60 * 60 * 1000, // 1 hour
-//       });
-  
-//       res.json({ success: true });
-//     } catch (err) {
-//       console.error("Google login error:", err.message);
-//       res.status(401).json({ error: "Invalid Google token" });
-//     }
-//   });
-
-app.post("/api/auth/google", async (req, res) => {
-  const {credential} = req.body;
-  if (!credential) return res.status(400).send("Missing credential");
-  try {
-    const googleRes = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
-    const { email, name, picture, sub } = googleRes.data;
-    const token = jwt.sign({ email, name, picture, sub }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-    res.cookie("accessToken", token, {
-      httpOnly: true,
-      secure: process.env.ENVIRONMENT === "production",
-      sameSite: process.env.SAME_SITE || "Lax",
-      maxAge: 60 * 60 * 1000,
-    });
-
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Google login error:", err.message);
-    res.status(401).json({ error: "Invalid Google token" });}
-});
-
-
-  // Protected user route
-app.get("/api/me", verifyToken, (req, res) => {
-    console.log(req.user);
-    res.json({ user: req.user });
-});
-  
-// Logout route
-app.post("/api/logout", (req, res) => {
-    res.clearCookie("accessToken");
-    res.json({ message: "Logged out" });
-});
+// // Logout route
+// app.post("/api/logout", (req, res) => {
+//     res.clearCookie("accessToken");
+//     res.json({ message: "Logged out" });
+// });
 
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);

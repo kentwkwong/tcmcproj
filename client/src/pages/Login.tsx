@@ -7,12 +7,16 @@ import {
   TextField,
   Typography,
   Paper,
+  Link,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useEffect } from "react";
 import { Google } from "@mui/icons-material";
+import axios from "../api/axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const schema = yup.object({
   email: yup.string().email("Invalid email").required("Email is required"),
@@ -41,21 +45,42 @@ const Login = () => {
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data: FormData) => {
-    console.log("Form Data:", data);
-    // You can send login request here
+  const onSubmit = async (data: FormData) => {
+    try {
+      console.log("Form Data:", data);
+      const res = await axios.post(
+        `/users/login`,
+        {
+          email: data.email,
+          password: data.password,
+        },
+        { withCredentials: true }
+      );
+      console.log(res);
+
+      if (res.data.success) {
+        toast.success("Login successful!");
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 1500);
+      }
+    } catch (err: any) {
+      const errorMsg =
+        err?.response?.data?.error || "Login failed. Please try again.";
+      toast.error(errorMsg);
+    }
   };
 
   return (
     <Box
-      sx={{
-        height: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        bgcolor: "background.default",
-        px: 2,
-      }}
+    //   sx={{
+    //     height: "100vh",
+    //     display: "flex",
+    //     alignItems: "center",
+    //     justifyContent: "center",
+    //     bgcolor: "background.default",
+    //     px: 2,
+    //   }}
     >
       <Container maxWidth="xs">
         <Paper elevation={3} sx={{ p: 3, mt: 6 }}>
@@ -94,6 +119,13 @@ const Login = () => {
             >
               Sign in with Google
             </Button>
+          </Typography>
+          <Typography align="left" sx={{ mt: 2 }}>
+            Don't have an account?
+            <Link href="/register" underline="hover">
+              {" "}
+              Register
+            </Link>
           </Typography>
         </Paper>
       </Container>
