@@ -111,8 +111,8 @@ const Navbar: React.FC = () => {
                 <MenuItem component={Link} to="/profile" onClick={handleClose}>
                   Profile
                 </MenuItem>
-                <MenuItem component={Link} to="/settings" onClick={handleClose}>
-                  Settings
+                <MenuItem component={Link} to="/kids" onClick={handleClose}>
+                  Kids
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
