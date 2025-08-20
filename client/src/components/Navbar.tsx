@@ -13,6 +13,7 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { Label } from "@mui/icons-material";
 
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
@@ -28,6 +29,7 @@ const Navbar: React.FC = () => {
     { label: "Home", path: "/" },
     { label: "Profile", path: "/profile" },
     { label: "About", path: "/about" },
+    { label: "CheckIn", path: "/checkin" },
   ];
 
   return (

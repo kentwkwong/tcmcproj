@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import About from "./pages/About";
 import Register from "./pages/Register";
+import CheckIn from "./pages/CheckIn";
 // import Kids from "./pages/Kids";
 
 const App: React.FC = () => {
@@ -16,6 +17,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/checkin" element={<CheckIn />} />
         <Route
           path="/dashboard"
           element={
