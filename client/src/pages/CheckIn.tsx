@@ -1,5 +1,5 @@
 // CheckInPage.jsx
-import React, { useState, useEffect, useRef, SyntheticEvent } from "react";
+import { useState, useEffect, useRef, SyntheticEvent } from "react";
 import {
   Container,
   Typography,
@@ -24,7 +24,7 @@ type Kid = {
   phone: string;
 };
 
-const checkedIn: Kid[] = [];
+// const checkedIn: Kid[] = [];
 
 const mockKids: Kid[] = [
   { name: "Liam", parent: "Olivia", phone: "123-456-7890" },
@@ -91,35 +91,34 @@ const CheckInPage = () => {
       });
   };
 
-  // useEffect(() => {
-  //   if (mode === "scan") {
-  //     const config = { fps: 5, qrbox: { width: 250, height: 250 } };
-  //     html5QrCodeRef.current = new Html5Qrcode(qrCodeRegionId);
-  //     html5QrCodeRef.current
-  //       .start(
-  //         { facingMode: "environment" },
-  //         config,
-  //         (decodedText) => {
-  //           const kid = mockKids.find(
-  //             (k) => k.name.toLowerCase() === decodedText.toLowerCase()
-  //           );
-  //           if (kid && !checkedIn.some((c) => c.name === kid.name)) {
-  //             setCheckedIn((prev) => [...prev, kid]);
-  //           }
-  //           html5QrCodeRef.current.stop().catch(() => {});
-  //         },
-  //         () => {}
-  //       )
-  //       .catch((err) => console.error("QR scanner error:", err));
-  //   }
+  useEffect(() => {
+    if (mode === "scan") {
+      const config = { fps: 5, qrbox: { width: 250, height: 250 } };
+      html5QrCodeRef.current = new Html5Qrcode(qrCodeRegionId);
+      html5QrCodeRef.current
+        .start(
+          { facingMode: "environment" },
+          config,
+          (decodedText) => {
+            const kid = mockKids.find(
+              (k) => k.name.toLowerCase() === decodedText.toLowerCase()
+            );
+            if (kid && !checkedIn.some((c) => c.name === kid.name)) {
+              setCheckedIn((prev) => [...prev, kid]);
+            }
+          },
+          () => {}
+        )
+        .catch((err) => console.error("QR scanner error:", err));
+    }
 
-  //   return () => {
-  //     if (html5QrCodeRef.current) {
-  //       html5QrCodeRef.current.stop().catch(() => {});
-  //       html5QrCodeRef.current.clear();
-  //     }
-  //   };
-  // }, [mode]);
+    return () => {
+      if (html5QrCodeRef.current) {
+        html5QrCodeRef.current.stop().catch(() => {});
+        html5QrCodeRef.current.clear();
+      }
+    };
+  }, [mode]);
 
   const handleSelectKid = (event: SyntheticEvent, value: Kid | null) => {
     if (value && !checkedIn.some((k) => k.name === value.name)) {
@@ -137,7 +136,32 @@ const CheckInPage = () => {
         📅 Today: {today}
       </Typography>
 
-      <RadioGroup row value={mode} onChange={(e) => setMode(e.target.value)}>
+      <RadioGroup
+        row
+        value={mode}
+        onChange={(e) => {
+          const newMode = e.target.value;
+          if (mode === "scan" && html5QrCodeRef.current) {
+            console.log("CP1");
+            html5QrCodeRef.current
+              .stop()
+              .then(() => {
+                console.log(newMode);
+                return html5QrCodeRef.current?.clear();
+              })
+              .then(() => {
+                html5QrCodeRef.current = null;
+                setMode(newMode);
+              })
+              .catch((err) => {
+                console.error("Failed to stop QR scanner:", err);
+                setMode(newMode); // fallback
+              });
+          } else {
+            setMode(newMode);
+          }
+        }}
+      >
         <FormControlLabel
           value="search"
           control={<Radio />}
@@ -149,6 +173,19 @@ const CheckInPage = () => {
           label="Scan QR Code"
         />
       </RadioGroup>
+      {/* 
+      <RadioGroup row value={mode} onChange={(e) => setMode(e.target.value)}>
+        <FormControlLabel
+          value="search"
+          control={<Radio />}
+          label="Search by Name"
+        />
+        <FormControlLabel
+          value="scan"
+          control={<Radio />}
+          label="Scan QR Code"
+        />
+      </RadioGroup> */}
 
       {mode === "search" && (
         <Autocomplete
