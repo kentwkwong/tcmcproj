@@ -1,5 +1,5 @@
 // CheckInPage.jsx
-import { useState, useEffect, useRef, SyntheticEvent } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Container,
   Typography,
@@ -34,30 +34,26 @@ const mockKids: Kid[] = [
 ];
 
 const CheckInPage = () => {
-  const [mode, setMode] = useState("search");
   const [selectedKid, setSelectedKid] = useState<Kid | null>(null);
   const [checkedIn, setCheckedIn] = useState<Kid[]>([]);
   const [searchInput, setSearchInput] = useState("");
   const qrCodeRegionId = "qr-reader";
 
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
-
-  //   const [cameraType, setCameraType] = useState("environment");
   const [cameraUsing, setCameraUsing] = useState(false);
   const [scannedResult, setScannedResult] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState("");
-  //   const scannerRef = useRef<Html5Qrcode | null>(null);
 
   const today = new Date().toLocaleDateString();
 
-  const stopScanner = () => {
+  const stopScanner = async () => {
     setCameraUsing(false);
     if (html5QrCodeRef.current) {
-      html5QrCodeRef.current.stop();
+      await html5QrCodeRef.current.stop();
+      await html5QrCodeRef.current.clear();
+      html5QrCodeRef.current = null;
     }
   };
   const startScanner = () => {
-    setErrorMessage("");
     setScannedResult(null);
     setCameraUsing(true);
     const config = { fps: 5, qrbox: { width: 250, height: 250 } }; // Scanner configuration
@@ -65,7 +61,7 @@ const CheckInPage = () => {
     Html5Qrcode.getCameras()
       .then((devices) => {
         if (devices.length > 0) {
-          html5QrCodeRef.current = new Html5Qrcode("reader");
+          html5QrCodeRef.current = new Html5Qrcode(qrCodeRegionId);
 
           html5QrCodeRef.current
             .start(
@@ -73,54 +69,41 @@ const CheckInPage = () => {
               config,
               (decodedText) => {
                 setScannedResult(decodedText);
-                stopScanner();
+                console.log(decodedText);
+                // stopScanner();
+                html5QrCodeRef.current?.stop();
               },
-              (errorMessage) => {
-                console.warn(errorMessage);
-              }
+              () => {}
             )
             .catch((err) => {
-              setErrorMessage("Failed to start scanner: " + err);
+              console.log("Failed to start scanner: " + err);
             });
         } else {
-          setErrorMessage("No cameras found.");
+          console.log("No cameras found.");
         }
       })
       .catch((err) => {
-        setErrorMessage("Error fetching camera devices: " + err);
+        console.log("Error fetching camera devices: " + err);
       });
   };
 
   useEffect(() => {
-    if (mode === "scan") {
-      const config = { fps: 5, qrbox: { width: 250, height: 250 } };
-      html5QrCodeRef.current = new Html5Qrcode(qrCodeRegionId);
-      html5QrCodeRef.current
-        .start(
-          { facingMode: "environment" },
-          config,
-          (decodedText) => {
-            const kid = mockKids.find(
-              (k) => k.name.toLowerCase() === decodedText.toLowerCase()
-            );
-            if (kid && !checkedIn.some((c) => c.name === kid.name)) {
-              setCheckedIn((prev) => [...prev, kid]);
-            }
-          },
-          () => {}
-        )
-        .catch((err) => console.error("QR scanner error:", err));
+    if (cameraUsing) {
+      startScanner();
     }
 
     return () => {
-      if (html5QrCodeRef.current) {
-        html5QrCodeRef.current.stop().catch(() => {});
-        html5QrCodeRef.current.clear();
-      }
+      stopScanner();
     };
-  }, [mode]);
+  }, [cameraUsing]);
 
-  const handleSelectKid = (event: SyntheticEvent, value: Kid | null) => {
+  useEffect(() => {
+    console.log(searchInput);
+  }, [searchInput]);
+
+  useEffect(() => {}, [selectedKid]);
+
+  const handleSelectKid = (_: any, value: Kid | null) => {
     if (value && !checkedIn.some((k) => k.name === value.name)) {
       setCheckedIn((prev) => [...prev, value]);
     }
@@ -138,60 +121,28 @@ const CheckInPage = () => {
 
       <RadioGroup
         row
-        value={mode}
+        value={cameraUsing}
         onChange={(e) => {
-          const newMode = e.target.value;
-          if (mode === "scan" && html5QrCodeRef.current) {
-            console.log("CP1");
-            html5QrCodeRef.current
-              .stop()
-              .then(() => {
-                console.log(newMode);
-                return html5QrCodeRef.current?.clear();
-              })
-              .then(() => {
-                html5QrCodeRef.current = null;
-                setMode(newMode);
-              })
-              .catch((err) => {
-                console.error("Failed to stop QR scanner:", err);
-                setMode(newMode); // fallback
-              });
-          } else {
-            setMode(newMode);
-          }
+          setCameraUsing(e.target.value === "true");
         }}
       >
         <FormControlLabel
-          value="search"
+          value="false"
           control={<Radio />}
           label="Search by Name"
         />
         <FormControlLabel
-          value="scan"
+          value="true"
           control={<Radio />}
           label="Scan QR Code"
         />
       </RadioGroup>
-      {/* 
-      <RadioGroup row value={mode} onChange={(e) => setMode(e.target.value)}>
-        <FormControlLabel
-          value="search"
-          control={<Radio />}
-          label="Search by Name"
-        />
-        <FormControlLabel
-          value="scan"
-          control={<Radio />}
-          label="Scan QR Code"
-        />
-      </RadioGroup> */}
 
-      {mode === "search" && (
+      {!cameraUsing && (
         <Autocomplete
           options={mockKids}
           getOptionLabel={(option) => option.name}
-          onInputChange={(e, value) => setSearchInput(value)}
+          onInputChange={(_: any, value) => setSearchInput(value)}
           onChange={handleSelectKid}
           renderInput={(params) => (
             <TextField
@@ -205,13 +156,28 @@ const CheckInPage = () => {
         />
       )}
 
-      {mode === "scan" && (
+      {cameraUsing && !scannedResult && (
+        <Typography variant="body2" color="textSecondary">
+          Looking for QR code...
+        </Typography>
+      )}
+
+      {cameraUsing && (
         <div
           id={qrCodeRegionId}
           style={{ width: "100%", marginTop: "20px" }}
         ></div>
       )}
-
+      <TextField
+        label="Scanned Result"
+        variant="outlined"
+        fullWidth
+        value={scannedResult ?? ""}
+        sx={{ mt: 2 }}
+        InputProps={{
+          readOnly: true,
+        }}
+      />
       {checkedIn.length > 0 && (
         <Paper sx={{ mt: 4 }}>
           <Typography variant="h6" sx={{ p: 2 }}>
