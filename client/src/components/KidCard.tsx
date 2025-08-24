@@ -1,8 +1,8 @@
 import React from "react";
 import { Card, CardContent, Typography, Button, Box } from "@mui/material";
-import { QRCodeCanvas } from "qrcode.react";
 import { calculateAge, formatDate } from "./Utility";
 import { Kid } from "../types/Kid";
+import StyledQRCode from "./StyledQRCode";
 
 interface Props {
   kid: Kid;
@@ -23,7 +23,7 @@ const KidCard: React.FC<Props> = ({ kid, onEdit, onDelete }) => {
 
         {kid._id && (
           <Box mt={2}>
-            <QRCodeCanvas value={kid._id} size={200} />
+            <StyledQRCode value={kid._id} />
           </Box>
         )}
 
