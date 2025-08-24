@@ -65,31 +65,38 @@ const CheckInPage = () => {
 
     Html5Qrcode.getCameras()
       .then((devices) => {
-        const backCam = devices.find(
-          (d) => d.label.toLowerCase().includes("back") || devices[0]
-        );
-        if (backCam) {
-          if (!html5QrCodeRef.current) {
-            html5QrCodeRef.current = new Html5Qrcode(qrCodeRegionId);
-          }
-
-          html5QrCodeRef.current
-            .start(
-              { deviceId: backCam.id },
-              config,
-              (decodedText) => {
-                setScannedResult(decodedText);
-                console.log(decodedText);
-                html5QrCodeRef.current?.stop();
-              },
-              () => {}
-            )
-            .catch((err) => {
-              console.log("Failed to start scanner: " + err);
-            });
-        } else {
-          console.log("No cameras found.");
+        if (devices.length === 0) {
+          console.error("No cameras found.");
+          return;
         }
+
+        // Try to find a back-facing camera
+        let selectedDevice = devices.find((d) =>
+          d.label.toLowerCase().includes("back")
+        );
+        if (!selectedDevice) {
+          selectedDevice =
+            devices.length > 1 ? devices[devices.length - 1] : devices[0];
+        }
+
+        if (!html5QrCodeRef.current) {
+          html5QrCodeRef.current = new Html5Qrcode(qrCodeRegionId);
+        }
+
+        html5QrCodeRef.current
+          .start(
+            { deviceId: selectedDevice.id },
+            config,
+            (decodedText) => {
+              setScannedResult(decodedText);
+              console.log(decodedText);
+              html5QrCodeRef.current?.stop();
+            },
+            () => {}
+          )
+          .catch((err) => {
+            console.log("Failed to start scanner: " + err);
+          });
       })
       .catch((err) => {
         console.log("Error fetching camera devices: " + err);
