@@ -60,21 +60,26 @@ const CheckInPage = () => {
       fps: 10,
       qrbox: { width: 250, height: 250 },
       aspectRatio: 1.77,
+      disableFlip: true,
     }; // Scanner configuration
 
     Html5Qrcode.getCameras()
       .then((devices) => {
-        if (devices.length > 0) {
-          html5QrCodeRef.current = new Html5Qrcode(qrCodeRegionId);
+        const backCam = devices.find(
+          (d) => d.label.toLowerCase().includes("back") || devices[0]
+        );
+        if (backCam) {
+          if (!html5QrCodeRef.current) {
+            html5QrCodeRef.current = new Html5Qrcode(qrCodeRegionId);
+          }
 
           html5QrCodeRef.current
             .start(
-              { facingMode: "environment" },
+              { deviceId: backCam.id },
               config,
               (decodedText) => {
                 setScannedResult(decodedText);
                 console.log(decodedText);
-                // stopScanner();
                 html5QrCodeRef.current?.stop();
               },
               () => {}
