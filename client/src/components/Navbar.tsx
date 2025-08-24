@@ -19,7 +19,7 @@ const Navbar: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const toggleDrawer = (open: boolean) => () => setDrawerOpen(open);
+  const toggleDrawer = (open: boolean) => () => setDrawerOpen(!open);
   const handleMenu = (e: React.MouseEvent<HTMLElement>) =>
     setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
@@ -114,6 +114,9 @@ const Navbar: React.FC = () => {
                 </MenuItem>
                 <MenuItem component={Link} to="/kids" onClick={handleClose}>
                   Kids
+                </MenuItem>
+                <MenuItem component={Link} to="/checkin" onClick={handleClose}>
+                  CheckIn
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
