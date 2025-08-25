@@ -1,144 +1,103 @@
-import { useAuth } from "../context/AuthContext";
-import React, { useEffect, useState } from "react";
-import { Kid } from "../types/Kid";
-// import { formatDate, calculateAge } from "../components/Utility";
-import { DatePicker } from "@mui/x-date-pickers";
-import KidCard from "../components/KidCard";
-import axios from "../api/axios";
-import {
-  TextField,
-  Button,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Grid,
-  Box,
-} from "@mui/material";
+// import { useAuth } from "../context/AuthContext";
 
-const Profile = () => {
-  const { user } = useAuth();
-  const [kids, setKids] = useState<Kid[]>([]);
-  const [form, setForm] = useState<Kid>({
-    name: "",
-    dob: "",
-    email: user?.email || "",
-    gender: "M",
-  });
-  const [editingId, setEditingId] = useState<string | null>(null);
+// import React, { useEffect, useState } from "react";
+// import {
+//   Card,
+//   CardContent,
+//   Typography,
+//   Grid,
+//   List,
+//   ListItem,
+//   ListItemText,
+//   Box,
+// } from "@mui/material";
+// import { Profile } from "../types/Parents";
+// import axios from "../api/axios";
+// import { Kid } from "../types/Kid";
 
-  useEffect(() => {
-    fetchKids();
-  }, []);
+// const Profile = (data: Profile) => {
+//   const { user } = useAuth();
+//   const [kids, setKids] = useState<Kid[]>([]);
+//   const fetchKids = async () => {
+//     const res = await axios.get<Kid[]>("/kids", {
+//       params: {
+//         email: user?.email,
+//       },
+//     });
+//     setKids(res.data);
+//   };
 
-  const fetchKids = async () => {
-    const res = await axios.get<Kid[]>("/kids", {
-      params: {
-        email: user?.email,
-      },
-    });
-    setKids(res.data);
-  };
+//   const [profile, setProfile] = useState<Profile | null>(null);
+//   const fetchProfile = async () => {
+//     const res = await axios.get<Profile>("/profile", {
+//       params: {
+//         email: user?.email,
+//       },
+//     });
+//     setProfile(res.data);
+//   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingId) {
-      const { _id, ...safeForm } = form;
-      console.log("Editing ID: " + editingId);
-      await axios.put<Kid>(`/kids/${editingId}`, safeForm);
-    } else {
-      await axios.post<Kid>("/kids", form);
-    }
-    setForm({ name: "", dob: "", email: user?.email || "", gender: "M" });
-    setEditingId(null);
-    fetchKids();
-  };
+//     useEffect(() => {
+//       fetchKids();
+//       fetchProfile();
+//     }, []);
 
-  const handleEdit = (kid: Kid) => {
-    setForm(kid);
-    setEditingId(kid._id || null);
-  };
+//   return (
+//     <Box sx={{ p: 3 }}>
+//       <Typography variant="h4" gutterBottom>
+//         Family Dashboard
+//       </Typography>
 
-  const handleDelete = async (id: string | undefined) => {
-    if (!id) return;
-    await axios.delete(`/kids/${id}`);
-    fetchKids();
-  };
+//       <Card variant="outlined" sx={{ mb: 3 }}>
+//         <CardContent>
+//           <Typography variant="h6">Email</Typography>
+//           <Typography>{data.email}</Typography>
+//         </CardContent>
+//       </Card>
 
-  return (
-    <div style={{ padding: "20px" }}>
-      <h1>Hello, {user?.name}</h1>
-      <h2>👤 Profile Manager</h2>
+//       <Grid container spacing={2}>
+//         <Grid item xs={12} md={6}>
+//           {renderParent("mom", data.mom)}
+//         </Grid>
+//         <Grid item xs={12} md={6}>
+//           {renderParent("dad", data.dad)}
+//         </Grid>
+//       </Grid>
 
-      <Box component="form" onSubmit={handleSubmit} sx={{ mb: 4 }}>
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <TextField
-              fullWidth
-              label="Name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-            />
-          </Grid>
-          <FormControl>
-            <FormLabel>Gender</FormLabel>
-            <RadioGroup
-              row
-              value={form.gender}
-              onChange={(e) => setForm({ ...form, gender: e.target.value })}
-            >
-              <FormControlLabel value="M" control={<Radio />} label="Male" />
-              <FormControlLabel value="F" control={<Radio />} label="Female" />
-            </RadioGroup>
-          </FormControl>
-          {/* <Grid size={{ xs: 12, sm: 4 }}>
-            <TextField
-              fullWidth
-              label="Email"
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-            />
-          </Grid> */}
-          {/* <Grid size={{ xs: 12, sm: 4 }}>
-            <TextField
-              fullWidth
-              label="Date of Birth"
-              value={formatDate(form.dob)}
-              onChange={(e) => setForm({ ...form, dob: e.target.value })}
-            />
-          </Grid> */}
-          <DatePicker
-            label="Date of Birth"
-            value={form.dob ? new Date(form.dob) : null}
-            onChange={(date) => {
-              setForm({ ...form, dob: date ? date.toISOString() : "" });
-            }}
-            slotProps={{
-              textField: {
-                fullWidth: true,
-                variant: "outlined",
-              },
-            }}
-          />
-          <Grid size={{ xs: 12 }}>
-            <Button variant="contained" type="submit">
-              {editingId ? "Update" : "Add"} Kid
-            </Button>
-          </Grid>
-        </Grid>
-      </Box>
+//       <Card variant="outlined">
+//         <CardContent>
+//           <Typography variant="h6">Kids</Typography>
+//           {data.kids.length > 0 ? (
+//             <List>
+//               {data.kids.map((kid, index) => (
+//                 <ListItem key={index}>
+//                   <ListItemText primary={`Kid ${index + 1}: ${kid}`} />
+//                 </ListItem>
+//               ))}
+//             </List>
+//           ) : (
+//             <Typography>No kids listed</Typography>
+//           )}
+//         </CardContent>
+//       </Card>
+//     </Box>
+//   );
+// };
 
-      <Grid container spacing={2}>
-        {kids.map((kid) => (
-          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={kid._id}>
-            <KidCard kid={kid} onEdit={handleEdit} onDelete={handleDelete} />
-          </Grid>
-        ))}
-      </Grid>
-    </div>
-  );
-};
+// // const Dashboard = () => {
+// //   const { user, logout } = useAuth();
 
-export default Profile;
+// //   return (
+// //     <div className="p-4">
+// //       <h1>Dashboard</h1>
+// //       <p>Welcome, {user?.name}</p>
+// //       <p>Your email: {user?.email}</p>
+// //       {/* <img src={user?.picture} alt="avatar" width={80} /> */}
+// //       <button onClick={logout} className="mt-4">
+// //         Logout
+// //       </button>
+// //     </div>
+// //   );
+// // };
+
+// export default Profile;

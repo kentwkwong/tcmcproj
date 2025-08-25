@@ -4,10 +4,11 @@ import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
-import Profile from "./pages/Profile";
+// import Profile from "./pages/Profile";
 import About from "./pages/About";
 import Register from "./pages/Register";
 import CheckIn from "./pages/CheckIn";
+import Kids from "./pages/Kids";
 // import Kids from "./pages/Kids";
 
 const App: React.FC = () => {
@@ -26,19 +27,19 @@ const App: React.FC = () => {
             </ProtectedRoute>
           }
         />
-        {/* <Route
+        <Route
           path="/kids"
           element={
             <ProtectedRoute>
               <Kids />
             </ProtectedRoute>
           }
-        /> */}
+        />
         <Route
-          path="/profile"
+          path="/checkin"
           element={
             <ProtectedRoute>
-              <Profile />
+              <CheckIn />
             </ProtectedRoute>
           }
         />

@@ -1,222 +1,126 @@
-// import React from "react";
-// import { Formik, Field, FieldArray, Form, FormikHelpers } from "formik";
-// import * as Yup from "yup";
-// import {
-//   TextField,
-//   Button,
-//   MenuItem,
-//   Grid,
-//   Container,
-//   Typography,
-//   Box,
-// } from "@mui/material";
+import { useAuth } from "../context/AuthContext";
+import React, { useEffect, useState } from "react";
+import { Kid } from "../types/Kid";
+import { DatePicker } from "@mui/x-date-pickers";
+import KidCard from "../components/KidCard";
+import axios from "../api/axios";
+import {
+  TextField,
+  Button,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  Grid,
+  Box,
+} from "@mui/material";
 
-// // Options for the "group" dropdown
-// const groupOptions = ["", "Red", "Orange", "Yellow", "Green"];
-// const genderOptions = ["Male", "Female"];
+const Kids = () => {
+  const { user } = useAuth();
+  const [kids, setKids] = useState<Kid[]>([]);
+  const [form, setForm] = useState<Kid>({
+    name: "",
+    dob: "",
+    email: user?.email || "",
+    gender: "M",
+  });
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-// // Yup validation schema
-// const validationSchema = Yup.object({
-//   kids: Yup.array()
-//     .of(
-//       Yup.object({
-//         name: Yup.string().required("Name is required"),
-//         dob: Yup.date().required("Date of birth is required").nullable(),
-//         gender: Yup.string().required("Gender is required"),
-//         group: Yup.string().required("Group is required"),
-//       })
-//     )
-//     .nullable(), // Allow null in case user has no kids
-// });
+  useEffect(() => {
+    fetchKids();
+  }, []);
 
-// interface KidFormData {
-//   kids: {
-//     name: string;
-//     dob: string;
-//     gender: string;
-//     group: string;
-//   }[];
-// }
+  const fetchKids = async () => {
+    const res = await axios.get<Kid[]>("/kids", {
+      params: {
+        email: user?.email,
+      },
+    });
+    setKids(res.data);
+  };
 
-// const Kids = () => {
-//   return (
-//     <Box>
-//       <Container maxWidth="sm">
-//         <Typography variant="h4" gutterBottom>
-//           Kids Information
-//         </Typography>
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingId) {
+      const { _id, ...safeForm } = form;
+      console.log("Editing ID: " + editingId);
+      await axios.put<Kid>(`/kids/${editingId}`, safeForm);
+    } else {
+      await axios.post<Kid>("/kids", form);
+    }
+    setForm({ name: "", dob: "", email: user?.email || "", gender: "M" });
+    setEditingId(null);
+    fetchKids();
+  };
 
-//         <Formik
-//           initialValues={{
-//             kids: [
-//               {
-//                 name: "",
-//                 dob: "",
-//                 gender: "",
-//                 group: "",
-//               },
-//             ],
-//           }}
-//           validationSchema={validationSchema}
-//           onSubmit={(
-//             values: KidFormData,
-//             { setSubmitting }: FormikHelpers<KidFormData>
-//           ) => {
-//             // Here you can handle your submit logic
-//             console.log("Form submitted:", values);
-//             setSubmitting(false);
-//           }}
-//         >
-//           {({
-//             values,
-//             handleChange,
-//             handleSubmit,
-//             errors,
-//             touched,
-//             setFieldValue,
-//             isSubmitting,
-//           }) => (
-//             <Form onSubmit={Formik.handleSubmit}>
-//               {" "}
-//               {/* Properly wire handleSubmit */}
-//               <FieldArray name="kids">
-//                 {({ push, remove }) => (
-//                   <div>
-//                     {values.kids?.map((kid, index) => (
-//                       <Grid container spacing={2} key={index}>
-//                         <Grid size={12}>
-//                           <Field
-//                             name={`kids.${index}.name`}
-//                             as={TextField}
-//                             label="Name"
-//                             fullWidth
-//                             value={kid.name}
-//                             onChange={handleChange}
-//                             error={
-//                               touched.kids?.[index]?.name &&
-//                               Boolean(errors.kids?.[index]?.toString)
-//                             }
-//                             helperText={
-//                               touched.kids?.[index]?.name &&
-//                               errors.kids?.[index]?.toString
-//                             }
-//                           />
-//                         </Grid>
-//                         <Grid size={12}>
-//                           <Field
-//                             name={`kids.${index}.dob`}
-//                             as={TextField}
-//                             label="Date of Birth"
-//                             type="date"
-//                             fullWidth
-//                             InputLabelProps={{ shrink: true }}
-//                             value={kid.dob}
-//                             onChange={handleChange}
-//                             error={
-//                               touched.kids?.[index]?.dob &&
-//                               Boolean(errors.kids?.[index]?.toString)
-//                             }
-//                             helperText={
-//                               touched.kids?.[index]?.dob &&
-//                               errors.kids?.[index]?.toString
-//                             }
-//                           />
-//                         </Grid>
-//                         <Grid size={12}>
-//                           <Field
-//                             name={`kids.${index}.gender`}
-//                             as={TextField}
-//                             label="Gender"
-//                             select
-//                             fullWidth
-//                             value={kid.gender}
-//                             onChange={handleChange}
-//                             error={
-//                               touched.kids?.[index]?.gender &&
-//                               Boolean(errors.kids?.[index]?.toString)
-//                             }
-//                             helperText={
-//                               touched.kids?.[index]?.gender &&
-//                               errors.kids?.[index]?.toString
-//                             }
-//                           >
-//                             {genderOptions.map((gender, idx) => (
-//                               <MenuItem key={idx} value={gender}>
-//                                 {gender}
-//                               </MenuItem>
-//                             ))}
-//                           </Field>
-//                         </Grid>
-//                         <Grid size={12}>
-//                           <Field
-//                             name={`kids.${index}.group`}
-//                             as={TextField}
-//                             label="Group"
-//                             select
-//                             fullWidth
-//                             value={kid.group}
-//                             onChange={handleChange}
-//                             error={
-//                               touched.kids?.[index]?.group &&
-//                               Boolean(errors.kids?.[index]?.toString)
-//                             }
-//                             helperText={
-//                               touched.kids?.[index]?.group &&
-//                               errors.kids?.[index]?.toString
-//                             }
-//                           >
-//                             {groupOptions.map((group, idx) => (
-//                               <MenuItem key={idx} value={group}>
-//                                 {group}
-//                               </MenuItem>
-//                             ))}
-//                           </Field>
-//                         </Grid>
-//                         {values.kids.length > 1 && (
-//                           <Grid size={12}>
-//                             <Button
-//                               variant="outlined"
-//                               color="error"
-//                               onClick={() => remove(index)}
-//                             >
-//                               Remove Kid
-//                             </Button>
-//                           </Grid>
-//                         )}
-//                       </Grid>
-//                     ))}
+  const handleEdit = (kid: Kid) => {
+    setForm(kid);
+    setEditingId(kid._id || null);
+  };
 
-//                     <Button
-//                       variant="outlined"
-//                       onClick={() =>
-//                         push({
-//                           name: "",
-//                           dob: "",
-//                           gender: "",
-//                           group: "",
-//                         })
-//                       }
-//                     >
-//                       Add Kid
-//                     </Button>
-//                   </div>
-//                 )}
-//               </FieldArray>
-//               <Button
-//                 type="submit"
-//                 variant="contained"
-//                 fullWidth
-//                 sx={{ mt: 3 }}
-//                 disabled={isSubmitting} // Disable the submit button when form is submitting
-//               >
-//                 Submit
-//               </Button>
-//             </Form>
-//           )}
-//         </Formik>
-//       </Container>
-//     </Box>
-//   );
-// };
+  const handleDelete = async (id: string | undefined) => {
+    if (!id) return;
+    await axios.delete(`/kids/${id}`);
+    fetchKids();
+  };
 
-// export default Kids;
+  return (
+    <div style={{ padding: "20px" }}>
+      <h1>Hello, {user?.name}</h1>
+      <h2>👤 Profile Manager</h2>
+
+      <Box component="form" onSubmit={handleSubmit} sx={{ mb: 4 }}>
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <TextField
+              fullWidth
+              label="Name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+          </Grid>
+          <FormControl>
+            <FormLabel>Gender</FormLabel>
+            <RadioGroup
+              row
+              value={form.gender}
+              onChange={(e) => setForm({ ...form, gender: e.target.value })}
+            >
+              <FormControlLabel value="M" control={<Radio />} label="Male" />
+              <FormControlLabel value="F" control={<Radio />} label="Female" />
+            </RadioGroup>
+          </FormControl>
+          <DatePicker
+            label="Date of Birth"
+            value={form.dob ? new Date(form.dob) : null}
+            onChange={(date) => {
+              setForm({ ...form, dob: date ? date.toISOString() : "" });
+            }}
+            slotProps={{
+              textField: {
+                fullWidth: true,
+                variant: "outlined",
+              },
+            }}
+          />
+          <Grid size={{ xs: 12 }}>
+            <Button variant="contained" type="submit">
+              {editingId ? "Update" : "Add"} Kid
+            </Button>
+          </Grid>
+        </Grid>
+      </Box>
+
+      <Grid container spacing={2}>
+        {kids.map((kid) => (
+          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={kid._id}>
+            <KidCard kid={kid} onEdit={handleEdit} onDelete={handleDelete} />
+          </Grid>
+        ))}
+      </Grid>
+    </div>
+  );
+};
+
+export default Kids;

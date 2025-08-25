@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import express from "express";
 import cors from "cors";
-import profiles from "./routes/profiles.js";
+import parents from "./routes/parents.js";
 import kids from "./routes/kids.js"
 import users from "./routes/users.js";
 import cookieParser from 'cookie-parser';
@@ -19,7 +19,7 @@ app.use(cors({
   origin: process.env.FRONTEND_ORIGIN,
   credentials: true,
 }));
-app.use("/profiles", profiles);
+app.use("/parents", parents);
 app.use("/kids", kids);
 app.use("/users", users);
 app.get("/", (req, res)=>res.send("eXpress on testing"));

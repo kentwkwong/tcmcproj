@@ -26,7 +26,6 @@ const Navbar: React.FC = () => {
 
   const navLinks = [
     { label: "Home", path: "/" },
-    { label: "Profile", path: "/profile" },
     { label: "About", path: "/about" },
     { label: "CheckIn", path: "/checkin" },
   ];
@@ -109,8 +108,12 @@ const Navbar: React.FC = () => {
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
               >
-                <MenuItem component={Link} to="/profile" onClick={handleClose}>
-                  Profile
+                <MenuItem
+                  component={Link}
+                  to="/dashboard"
+                  onClick={handleClose}
+                >
+                  Dashboard
                 </MenuItem>
                 <MenuItem component={Link} to="/kids" onClick={handleClose}>
                   Kids
