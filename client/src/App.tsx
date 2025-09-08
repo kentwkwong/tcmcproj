@@ -9,6 +9,7 @@ import About from "./pages/About";
 import Register from "./pages/Register";
 import CheckIn from "./pages/CheckIn";
 import Kids from "./pages/Kids";
+import Profile from "./pages/Profile";
 // import Kids from "./pages/Kids";
 
 const App: React.FC = () => {
@@ -16,14 +17,11 @@ const App: React.FC = () => {
     <BrowserRouter>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/checkin" element={<CheckIn />} />
         <Route
-          path="/dashboard"
+          path="/profile"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <Profile />
             </ProtectedRoute>
           }
         />
@@ -32,6 +30,14 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <Kids />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
             </ProtectedRoute>
           }
         />

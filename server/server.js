@@ -4,6 +4,7 @@ import cors from "cors";
 import parents from "./routes/parents.js";
 import kids from "./routes/kids.js"
 import users from "./routes/users.js";
+import checkin from "./routes/checkin.js";
 import cookieParser from 'cookie-parser';
 // import verifyToken from './verifyToken.js';
 // import { authenticateJWT } from './middleware/authMiddleware.js';
@@ -22,6 +23,7 @@ app.use(cors({
 app.use("/parents", parents);
 app.use("/kids", kids);
 app.use("/users", users);
+app.use("/checkin", checkin);
 app.get("/", (req, res)=>res.send("eXpress on testing"));
 app.get("/on9test", (req, res)=>{
   res.send("on9 testing")

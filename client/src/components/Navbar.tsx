@@ -81,22 +81,6 @@ const Navbar: React.FC = () => {
           {!user ? (
             <Box></Box>
           ) : (
-            // <Box>
-            //   <IconButton onClick={handleMenu}>
-            //     <Avatar src={user.picture} />
-            //   </IconButton>
-            //   <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={handleClose}>
-            //     <MenuItem
-            //       onClick={() => {
-            //         handleClose();
-            //         logout();
-            //       }}
-            //     >
-            //       Logout
-            //     </MenuItem>
-            //   </Menu>
-            // </Box>
-
             <Box>
               <IconButton onClick={handleMenu}>
                 <Avatar src={user.picture} />
@@ -108,6 +92,12 @@ const Navbar: React.FC = () => {
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
               >
+                <MenuItem component={Link} to="/profile" onClick={handleClose}>
+                  Profile
+                </MenuItem>
+                <MenuItem component={Link} to="/kids" onClick={handleClose}>
+                  Kids
+                </MenuItem>
                 <MenuItem
                   component={Link}
                   to="/dashboard"
@@ -115,9 +105,7 @@ const Navbar: React.FC = () => {
                 >
                   Dashboard
                 </MenuItem>
-                <MenuItem component={Link} to="/kids" onClick={handleClose}>
-                  Kids
-                </MenuItem>
+
                 <MenuItem component={Link} to="/checkin" onClick={handleClose}>
                   CheckIn
                 </MenuItem>
