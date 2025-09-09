@@ -2,7 +2,7 @@ import express from "express";
 
 import db from "../db/connection.js";
 import { ObjectId } from "mongodb";
-import {findKidsByEmail} from "../models/kidModel.js"
+import {getKidsByName} from "../models/kidModel.js"
 
 const router = express.Router();
 
@@ -37,6 +37,12 @@ router.post('/', async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 
+});
+
+router.get('/getkidsbyname/:keywords', async (req, res) => {
+    let keywords = req.params.keywords 
+    let results = await getKidsByName(keywords);
+    res.send(results).status(200);
 });
 
 router.put('/:id', async (req, res) => {

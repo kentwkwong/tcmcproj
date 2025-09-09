@@ -16,6 +16,7 @@ import {
   Autocomplete,
 } from "@mui/material";
 import { Html5Qrcode } from "html5-qrcode";
+import axios from "../api/axios";
 
 type Kid = {
   name: string;
@@ -34,6 +35,7 @@ const mockKids: Kid[] = [
 ];
 
 const CheckInPage = () => {
+  const [kidOptions, setKidOptions] = useState<Kid[]>([]);
   const [selectedKid, setSelectedKid] = useState<Kid | null>(null);
   const [checkedIn, setCheckedIn] = useState<Kid[]>([]);
   const [searchInput, setSearchInput] = useState("");
@@ -113,8 +115,37 @@ const CheckInPage = () => {
     };
   }, [cameraUsing]);
 
+  // useEffect(() => {
+  //   console.log(searchInput);
+  // }, [searchInput]);
+
   useEffect(() => {
     console.log(searchInput);
+    const controller = new AbortController();
+
+    const fetchKids = async () => {
+      if (!searchInput.trim()) {
+        setKidOptions([]);
+        return;
+      }
+
+      try {
+        const res = await axios.get(`/kids/getkidsbyname/${searchInput}`, {
+          signal: controller.signal,
+        });
+        setKidOptions(res.data);
+      } catch (err) {
+        if ((err as any)?.code === "ERR_CANCELED") return;
+        console.error("Error fetching kids:", err);
+      }
+    };
+
+    const debounce = setTimeout(fetchKids, 300); // debounce input
+
+    return () => {
+      clearTimeout(debounce);
+      controller.abort();
+    };
   }, [searchInput]);
 
   useEffect(() => {}, [selectedKid]);
@@ -156,7 +187,7 @@ const CheckInPage = () => {
 
       {!cameraUsing && (
         <Autocomplete
-          options={mockKids}
+          options={kidOptions}
           getOptionLabel={(option) => option.name}
           onInputChange={(_: any, value) => setSearchInput(value)}
           onChange={handleSelectKid}
@@ -170,6 +201,21 @@ const CheckInPage = () => {
             />
           )}
         />
+        // <Autocomplete
+        //   options={mockKids}
+        //   getOptionLabel={(option) => option.name}
+        //   onInputChange={(_: any, value) => setSearchInput(value)}
+        //   onChange={handleSelectKid}
+        //   renderInput={(params) => (
+        //     <TextField
+        //       {...params}
+        //       label="Search Kid Name"
+        //       variant="outlined"
+        //       fullWidth
+        //       sx={{ mt: 2 }}
+        //     />
+        //   )}
+        // />
       )}
 
       {cameraUsing && !scannedResult && (
