@@ -17,22 +17,8 @@ import {
 } from "@mui/material";
 import { Html5Qrcode } from "html5-qrcode";
 import axios from "../api/axios";
-
-type Kid = {
-  name: string;
-  age?: number; // optional, if needed;
-  parent: string;
-  phone: string;
-};
-
-// const checkedIn: Kid[] = [];
-
-const mockKids: Kid[] = [
-  { name: "Liam", parent: "Olivia", phone: "123-456-7890" },
-  { name: "Noah", parent: "Emma", phone: "234-567-8901" },
-  { name: "Ava", parent: "James", phone: "345-678-9012" },
-  { name: "Mia", parent: "Sophia", phone: "456-789-0123" },
-];
+import { Kid } from "../types/Kid";
+// import { Checkins } from "../types/Checkins";
 
 const CheckInPage = () => {
   const [kidOptions, setKidOptions] = useState<Kid[]>([]);
@@ -201,21 +187,6 @@ const CheckInPage = () => {
             />
           )}
         />
-        // <Autocomplete
-        //   options={mockKids}
-        //   getOptionLabel={(option) => option.name}
-        //   onInputChange={(_: any, value) => setSearchInput(value)}
-        //   onChange={handleSelectKid}
-        //   renderInput={(params) => (
-        //     <TextField
-        //       {...params}
-        //       label="Search Kid Name"
-        //       variant="outlined"
-        //       fullWidth
-        //       sx={{ mt: 2 }}
-        //     />
-        //   )}
-        // />
       )}
 
       {cameraUsing && !scannedResult && (
@@ -249,16 +220,16 @@ const CheckInPage = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Kid Name</TableCell>
-                <TableCell>Parent Name</TableCell>
-                <TableCell>Phone</TableCell>
+                <TableCell>DOB</TableCell>
+                <TableCell>Gender</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {checkedIn.map((mockKids, index) => (
+              {checkedIn.map((kidOptions, index) => (
                 <TableRow key={index}>
-                  <TableCell>{mockKids.name}</TableCell>
-                  <TableCell>{mockKids.parent}</TableCell>
-                  <TableCell>{mockKids.phone}</TableCell>
+                  <TableCell>{kidOptions.name}</TableCell>
+                  <TableCell>{kidOptions.dob.split("T")[0]}</TableCell>
+                  <TableCell>{kidOptions.gender}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
