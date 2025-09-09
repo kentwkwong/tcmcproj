@@ -12,10 +12,13 @@ import {
 } from "../models/checkinModel.js"
 import { findKidById } from "../models/kidModel.js";
 const router = express.Router();
+import { getTorontoDate } from "../utils/commonUtil.js";
 
-function getToday() {
-  return new Date().toISOString().split("T")[0];
-}
+
+router.get('/getlocaldatetime', async (req, res) =>{
+    const result = getTorontoDate();
+    res.send(result).status(200);
+});
 
 router.get('/getcheckinsbydate/:checkindate', async (req, res) => {
     let checkindate = req.params.checkindate 
@@ -44,7 +47,7 @@ router.post('/:idOrName', async (req, res) => {
         name = idOrName + " (new)";
     }
 
-    let date = getToday();
+    let date = getTorontoDate();
     // Step 2: Check for existing check-in
     let existing = await getCheckinByDateAndName(date, name);
     console.log(existing);

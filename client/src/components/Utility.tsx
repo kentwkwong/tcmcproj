@@ -17,3 +17,27 @@ export const calculateAge = (dob: string): number => {
 
   return age;
 };
+
+export function getTorontoDate(): string {
+  const date = new Date().toLocaleDateString("en-CA", {
+    timeZone: "America/Toronto",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  return date.replace(/\//g, "-"); // "YYYY-MM-DD"
+}
+
+export function getTorontoTime(): string {
+  return new Date().toLocaleTimeString("en-CA", {
+    timeZone: "America/Toronto",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+}
+
+export function getTorontoDateTime(): string {
+  return `${getTorontoDate()}T${getTorontoTime()}`;
+}

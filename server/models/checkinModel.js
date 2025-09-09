@@ -1,5 +1,6 @@
 import db from "../db/connection.js";
 import { ObjectId } from "mongodb";
+import { getTorontoTime } from "../utils/commonUtil.js";
 
 const checkins = () => db.collection("checkin");
 
@@ -15,7 +16,7 @@ export async function createCheckin({ date, name, refId = null }) {
   return checkins().insertOne({
     date,
     name,
-    checkin: new Date(),
+    checkin: getTorontoTime(),
     checkout: null,
     refId
   });
@@ -24,7 +25,7 @@ export async function createCheckin({ date, name, refId = null }) {
 export async function updateCheckoutTime(id) {
   return checkins().findOneAndUpdate(
     { _id: new ObjectId(id), checkout: null },
-    { $set: { checkout: new Date() } },
+    { $set: { checkout: getTorontoTime() } },
     { returnDocument: "after" } 
   );
 }

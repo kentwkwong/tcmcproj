@@ -15,11 +15,10 @@ import {
 import { useEffect, useState } from "react";
 import axios from "../api/axios";
 import { Checkins } from "../types/Checkins";
+import { getTorontoDate } from "../components/Utility";
 
 const Dashboard = () => {
-  const [selectedDate, setSelectedDate] = useState<string>(() => {
-    return new Date().toISOString().split("T")[0];
-  });
+  const [selectedDate, setSelectedDate] = useState<string>(getTorontoDate());
   const [checkins, setCheckins] = useState<Checkins[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -45,16 +44,10 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
+    console.log("start");
+    console.log(getTorontoDate());
     fetchCheckins(selectedDate);
   }, [selectedDate]);
-
-  const formatTime = (iso: string | null) => {
-    if (!iso) return "—";
-    return new Date(iso).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   return (
     <Box sx={{ p: 4 }}>
@@ -97,8 +90,8 @@ const Dashboard = () => {
               {checkins.map((record) => (
                 <TableRow key={record._id}>
                   <TableCell>{record.name}</TableCell>
-                  <TableCell>{formatTime(record.checkin)}</TableCell>
-                  <TableCell>{formatTime(record.checkout)}</TableCell>
+                  <TableCell>{record.checkin}</TableCell>
+                  <TableCell>{record.checkout}</TableCell>
                   <TableCell>
                     {!record.checkout && (
                       <Button
