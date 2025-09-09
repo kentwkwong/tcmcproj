@@ -12,11 +12,11 @@ import {
 } from "../models/checkinModel.js"
 import { findKidById } from "../models/kidModel.js";
 const router = express.Router();
-import { getTorontoDate } from "../utils/commonUtil.js";
+import { getTorontoDate, getTorontoDateTime } from "../utils/commonUtil.js";
 
 
 router.get('/getlocaldatetime', async (req, res) =>{
-    const result = getTorontoDate();
+    const result = getTorontoDateTime();
     res.send(result).status(200);
 });
 
