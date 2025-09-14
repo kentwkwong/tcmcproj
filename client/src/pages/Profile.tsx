@@ -1,27 +1,28 @@
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import {
-  Card,
-  CardContent,
   Typography,
-  List,
-  ListItem,
-  ListItemText,
   Box,
   Grid,
   Stack,
-  Divider,
   Button,
   TextField,
   Alert,
   CircularProgress,
   Fade,
+  FormControl,
+  RadioGroup,
+  Radio,
+  FormControlLabel,
+  FormLabel,
 } from "@mui/material";
 import { Parents } from "../types/Parents";
 import axios from "../api/axios";
 import { Kid } from "../types/Kid";
 import * as Yup from "yup";
 import { useFormik } from "formik";
+import KidCard from "../components/KidCard";
+import { DatePicker } from "@mui/x-date-pickers";
 
 const Profile = () => {
   const parentSchema = Yup.object().shape({
@@ -35,7 +36,6 @@ const Profile = () => {
   const { user } = useAuth();
 
   const [parent, setParent] = useState<Parents | null>(null);
-  const [kids, setKids] = useState<Kid[]>([]);
   const [editing, setEditing] = useState(false);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(true); // for initial load
@@ -45,6 +45,48 @@ const Profile = () => {
     const res = await axios.get<Parents>(`/parents/${user?.email}`);
     setParent(res.data);
   };
+
+  const [kids, setKids] = useState<Kid[]>([]);
+  const [isEditingKid, setIsEditingKid] = useState(false);
+  const [editingKidId, setEditingKidId] = useState<string | null>(null);
+  const [kidForm, setKidForm] = useState<Kid>({
+    name: "",
+    dob: "",
+    email: user?.email || "",
+    gender: "M",
+  });
+  const handleKidSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isEditingKid) {
+      if (editingKidId) {
+        const { _id, ...safeForm } = kidForm;
+        console.log("Editing ID: " + editingKidId);
+        await axios.put<Kid>(`/kids/${editingKidId}`, safeForm);
+      } else {
+        await axios.post<Kid>("/kids", kidForm);
+      }
+      setKidForm({ name: "", dob: "", email: user?.email || "", gender: "M" });
+      setEditingKidId(null);
+      fetchKids();
+      setIsEditingKid(false);
+    } else {
+      setIsEditingKid(true);
+    }
+  };
+
+  const handleKidEdit = (kid: Kid) => {
+    setIsEditingKid(true);
+    setKidForm(kid);
+    setEditingKidId(kid._id || null);
+  };
+
+  const handleKidDelete = async (id: string | undefined) => {
+    setIsEditingKid(false);
+    if (!id) return;
+    await axios.delete(`/kids/${id}`);
+    fetchKids();
+  };
+
   const fetchKids = async () => {
     const res = await axios.get<Kid[]>("/kids", {
       params: { email: user?.email },
@@ -106,145 +148,204 @@ const Profile = () => {
   }
   return (
     <Fade in={!loading}>
-      <Box sx={{ p: { xs: 2, sm: 3 }, maxWidth: 600, mx: "auto" }}>
-        <Typography variant="h5" gutterBottom textAlign="center">
-          Dashboard
-        </Typography>
+      <Box sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 4 } }}>
+        <center>
+          <Typography variant="h6" gutterBottom>
+            👤 Parent Contact Info
+          </Typography>
+        </center>
+        {/* Parent Info */}
+        <Grid container spacing={2}>
+          <Grid size={12}>
+            <Typography color="text.secondary">Email:</Typography>
+            <Typography>{user?.email}</Typography>
+          </Grid>
 
-        <Stack spacing={2}>
-          {/* Parent Info */}
-          <Card variant="outlined">
-            <CardContent>
-              <Typography variant="subtitle1" gutterBottom>
-                Parent Contact Info
-              </Typography>
-              <Divider sx={{ mb: 1 }} />
-              <Typography variant="body1" color="text.secondary">
-                Email:
-              </Typography>
-              <Typography variant="body2">{user?.email}</Typography>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Typography variant="body1" color="text.secondary">
+              Mom:
+            </Typography>
+            <Typography variant="body2">
+              {parent?.mom} ({parent?.momphone})
+            </Typography>
+          </Grid>
 
-              <Grid container spacing={2} mt={1}>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Typography variant="body1" color="text.secondary">
-                    Mom:
-                  </Typography>
-                  <Typography variant="body2">
-                    {parent?.mom} ({parent?.momphone})
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Typography variant="body1" color="text.secondary">
-                    Dad:
-                  </Typography>
-                  <Typography variant="body2">
-                    {parent?.dad} ({parent?.dadphone})
-                  </Typography>
-                </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Typography variant="body1" color="text.secondary">
+              Dad:
+            </Typography>
+            <Typography variant="body2">
+              {parent?.dad} ({parent?.dadphone})
+            </Typography>
+          </Grid>
+
+          <Grid size={12}>
+            <Button variant="outlined" fullWidth onClick={handleEdit}>
+              {editing ? "Cancel" : "Update Parent Info"}
+            </Button>
+          </Grid>
+
+          {success && (
+            <Grid size={{ xs: 12 }}>
+              <Alert severity="success">Parent info updated!</Alert>
+            </Grid>
+          )}
+
+          {editing && (
+            <Grid size={12}>
+              <form onSubmit={formik.handleSubmit}>
+                <Stack spacing={2} mt={2}>
+                  <TextField
+                    fullWidth
+                    label="Mom's Name"
+                    name="mom"
+                    value={formik.values.mom}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.mom && Boolean(formik.errors.mom)}
+                    helperText={formik.touched.mom && formik.errors.mom}
+                  />
+                  <TextField
+                    fullWidth
+                    label="Mom's Phone"
+                    name="momphone"
+                    value={formik.values.momphone}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={
+                      formik.touched.momphone && Boolean(formik.errors.momphone)
+                    }
+                    helperText={
+                      formik.touched.momphone && formik.errors.momphone
+                    }
+                  />
+                  <TextField
+                    fullWidth
+                    label="Dad's Name"
+                    name="dad"
+                    value={formik.values.dad}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.dad && Boolean(formik.errors.dad)}
+                    helperText={formik.touched.dad && formik.errors.dad}
+                  />
+                  <TextField
+                    fullWidth
+                    label="Dad's Phone"
+                    name="dadphone"
+                    value={formik.values.dadphone}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={
+                      formik.touched.dadphone && Boolean(formik.errors.dadphone)
+                    }
+                    helperText={
+                      formik.touched.dadphone && formik.errors.dadphone
+                    }
+                  />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={!formik.isValid || formik.isSubmitting}
+                    startIcon={
+                      submitting ? <CircularProgress size={20} /> : null
+                    }
+                  >
+                    {submitting ? "Saving..." : "Save"}
+                  </Button>
+                </Stack>
+              </form>
+            </Grid>
+          )}
+        </Grid>
+
+        <br />
+        {/* Kids Info */}
+
+        <Box sx={{ mt: 4 }}>
+          <center>
+            <Typography variant="h6" gutterBottom>
+              🧒 Kids
+            </Typography>
+          </center>
+          <Box component="form" onSubmit={handleKidSubmit} sx={{ mb: 4 }}>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <TextField
+                  fullWidth
+                  label="Name"
+                  value={kidForm.name}
+                  onChange={(e) =>
+                    setKidForm({ ...kidForm, name: e.target.value })
+                  }
+                  disabled={!isEditingKid}
+                />
               </Grid>
-
-              <Button
-                variant="outlined"
-                sx={{ mt: 2 }}
-                fullWidth
-                onClick={() => handleEdit()}
-              >
-                {editing ? "Cancel" : "Update Parent Info"}
-              </Button>
-              {success && (
-                <Alert severity="success">Parent info updated!</Alert>
-              )}
-              {editing && (
-                <form onSubmit={formik.handleSubmit}>
-                  <Stack spacing={2} mt={2}>
-                    <TextField
-                      label="Mom's Name"
-                      name="mom"
-                      value={formik.values.mom}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      error={formik.touched.mom && Boolean(formik.errors.mom)}
-                      helperText={formik.touched.mom && formik.errors.mom}
-                    />
-                    <TextField
-                      label="Mom's Phone"
-                      name="momphone"
-                      value={formik.values.momphone}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      error={
-                        formik.touched.momphone &&
-                        Boolean(formik.errors.momphone)
-                      }
-                      helperText={
-                        formik.touched.momphone && formik.errors.momphone
-                      }
-                    />
-                    <TextField
-                      label="Dad's Name"
-                      name="dad"
-                      value={formik.values.dad}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      error={formik.touched.dad && Boolean(formik.errors.dad)}
-                      helperText={formik.touched.dad && formik.errors.dad}
-                    />
-                    <TextField
-                      label="Dad's Phone"
-                      name="dadphone"
-                      value={formik.values.dadphone}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      error={
-                        formik.touched.dadphone &&
-                        Boolean(formik.errors.dadphone)
-                      }
-                      helperText={
-                        formik.touched.dadphone && formik.errors.dadphone
-                      }
-                    />
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      disabled={!formik.isValid || formik.isSubmitting}
-                      startIcon={
-                        submitting ? <CircularProgress size={20} /> : null
-                      }
-                    >
-                      {submitting ? "Saving..." : "Save"}
-                    </Button>
-                  </Stack>
-                </form>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Kids Info */}
-          <Card variant="outlined">
-            <CardContent>
-              <Typography variant="subtitle1" gutterBottom>
-                Kids Info
-              </Typography>
-              <Divider sx={{ mb: 1 }} />
-              {kids.length > 0 ? (
-                <List dense>
-                  {kids.map((kid, index) => (
-                    <ListItem key={index} disablePadding>
-                      <ListItemText
-                        primary={`${kid.name} (${kid.gender})`}
-                        secondary={`Kid ${index + 1}`}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  No kids listed
-                </Typography>
-              )}
-            </CardContent>
-          </Card>
-        </Stack>
+              <FormControl>
+                <FormLabel>Gender</FormLabel>
+                <RadioGroup
+                  row
+                  value={kidForm.gender}
+                  onChange={(e) =>
+                    setKidForm({ ...kidForm, gender: e.target.value })
+                  }
+                >
+                  <FormControlLabel
+                    value="M"
+                    control={<Radio />}
+                    label="Male"
+                    disabled={!isEditingKid}
+                  />
+                  <FormControlLabel
+                    value="F"
+                    control={<Radio />}
+                    label="Female"
+                    disabled={!isEditingKid}
+                  />
+                </RadioGroup>
+              </FormControl>
+              <DatePicker
+                label="Date of Birth"
+                value={kidForm.dob ? new Date(kidForm.dob) : null}
+                onChange={(date) => {
+                  setKidForm({
+                    ...kidForm,
+                    dob: date ? date.toISOString() : "",
+                  });
+                }}
+                disabled={!isEditingKid}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    variant: "outlined",
+                  },
+                }}
+              />
+              <Grid size={{ xs: 12 }}>
+                <Button variant="contained" type="submit">
+                  {isEditingKid ? "Save" : "Add"} Kid
+                </Button>
+              </Grid>
+            </Grid>
+          </Box>
+          <Grid container spacing={2}>
+            {kids.length > 0 ? (
+              kids.map((kid) => (
+                <Grid size={6} key={kid._id}>
+                  <KidCard
+                    kid={kid}
+                    onEdit={handleKidEdit}
+                    onDelete={handleKidDelete}
+                  />
+                </Grid>
+              ))
+            ) : (
+              <Grid size={12}>
+                <Typography color="text.secondary">No kids listed</Typography>
+              </Grid>
+            )}
+          </Grid>
+        </Box>
       </Box>
     </Fade>
   );
