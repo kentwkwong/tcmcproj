@@ -5,7 +5,6 @@ import {
   IconButton,
   Typography,
   Box,
-  Button,
   Avatar,
   Menu,
   MenuItem,
@@ -24,11 +23,11 @@ const Navbar: React.FC = () => {
     setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
-  const navLinks = [
-    { label: "Home", path: "/" },
-    { label: "About", path: "/about" },
-    { label: "CheckIn", path: "/checkin" },
-  ];
+  // const navLinks = [
+  //   { label: "Home", path: "/" },
+  //   { label: "About", path: "/about" },
+  //   { label: "CheckIn", path: "/checkin" },
+  // ];
 
   return (
     <>
