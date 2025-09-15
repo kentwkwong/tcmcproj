@@ -40,7 +40,7 @@ router.post('/:idOrName', async (req, res) => {
     // Step 1: Resolve name
     if (ObjectId.isValid(idOrName)) {
         let result = await findKidById(idOrName);
-        if (!result) return res.status(404).json({ message: 'Kid not found' });
+        if (!result) return res.status(409).json({ error: 'Kid not found' });
         name = result.name;
         refId = result._id;
     } else {
@@ -53,21 +53,18 @@ router.post('/:idOrName', async (req, res) => {
     console.log(existing);
 
     if (existing) {
-        if (!(existing.checkout)) {
-            return res.status(400).json({ message: `${name} is already checked in` });
-        }
+        return res.status(409).json({ error: `${name} is already checked in` });
     }
 
     // Step 3: Save new check-in
     const result = await createCheckin({ date, name, refId});
-    console.log(result);
     res.status(201).json({
       message: `${name} checks in successfully`,
       data: result
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: err });
+    res.status(500).json({ error: err });
   }
 });
 
@@ -80,7 +77,7 @@ router.put('/checkout/:id', async (req, res) => {
             return res.status(404).json({ error: "Checkin record not found" });
         }
         if (rec.checkout){
-            return res.status(404).json({ error: `${rec.name} was checked out already` });
+            return res.status(409).json({ error: `${rec.name} was checked out already` });
         }
         const result = await updateCheckoutTime(id);
         console.log(result)

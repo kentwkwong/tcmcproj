@@ -14,24 +14,29 @@ import {
   TableRow,
   Paper,
   Autocomplete,
+  Button,
 } from "@mui/material";
 import { Html5Qrcode } from "html5-qrcode";
 import axios from "../api/axios";
 import { Kid } from "../types/Kid";
+import { Checkins } from "../types/Checkins";
+import { getTorontoDate } from "../components/Utility";
+import { toast } from "react-toastify";
 // import { Checkins } from "../types/Checkins";
 
 const CheckInPage = () => {
   const [kidOptions, setKidOptions] = useState<Kid[]>([]);
   const [selectedKid, setSelectedKid] = useState<Kid | null>(null);
-  const [checkedIn, setCheckedIn] = useState<Kid[]>([]);
+  const [checkins, setCheckins] = useState<Checkins[]>([]);
   const [searchInput, setSearchInput] = useState("");
+  // const [loading, setLoading] = useState(false);
   const qrCodeRegionId = "qr-reader";
 
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
   const [cameraUsing, setCameraUsing] = useState(false);
   const [scannedResult, setScannedResult] = useState<string | null>(null);
 
-  const today = new Date().toLocaleDateString();
+  const today = getTorontoDate();
 
   const stopScanner = async () => {
     setCameraUsing(false);
@@ -54,7 +59,7 @@ const CheckInPage = () => {
     Html5Qrcode.getCameras()
       .then((devices) => {
         if (devices.length === 0) {
-          console.error("No cameras found.");
+          toast.error("No cameras found.");
           return;
         }
 
@@ -83,11 +88,11 @@ const CheckInPage = () => {
             () => {}
           )
           .catch((err) => {
-            console.log("Failed to start scanner: " + err);
+            toast.error("Failed to start scanner: " + err);
           });
       })
       .catch((err) => {
-        console.log("Error fetching camera devices: " + err);
+        toast.error("Error fetching camera devices: " + err);
       });
   };
 
@@ -101,12 +106,21 @@ const CheckInPage = () => {
     };
   }, [cameraUsing]);
 
-  // useEffect(() => {
-  //   console.log(searchInput);
-  // }, [searchInput]);
+  useEffect(() => {
+    fetchCheckin();
+  }, [checkins]);
+
+  const fetchCheckin = async () => {
+    try {
+      const res = await axios.get(`/checkin/getallcheckinsbydate/${today}`);
+      setCheckins(res.data);
+    } catch (err: any) {
+      console.error("Error fetching check-ins:", err);
+      toast.error(err.response?.data.error);
+    }
+  };
 
   useEffect(() => {
-    console.log(searchInput);
     const controller = new AbortController();
 
     const fetchKids = async () => {
@@ -137,10 +151,31 @@ const CheckInPage = () => {
   useEffect(() => {}, [selectedKid]);
 
   const handleSelectKid = (_: any, value: Kid | null) => {
-    if (value && !checkedIn.some((k) => k.name === value.name)) {
-      setCheckedIn((prev) => [...prev, value]);
-    }
+    // if (value && !checkedIn.some((k) => k.name === value.name)) {
+    //   setCheckedIn((prev) => [...prev, value]);
+    // }
     setSelectedKid(value);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      let name = selectedKid?.name;
+      if (selectedKid) {
+        await axios.post(`/checkin/${selectedKid._id}`);
+      } else if (searchInput.trim()) {
+        name = searchInput.trim();
+        await axios.post("/checkin", { idOrName: searchInput.trim() });
+      } else {
+        console.warn("No input provided");
+      }
+      toast.success(`${name} check in successfully! 🎉 `);
+    } catch (err: any) {
+      console.error("Submission failed:", err);
+      toast.error(err.response?.data.error);
+    }
+    setSearchInput("");
+    setSelectedKid(null);
+    fetchCheckin();
   };
 
   return (
@@ -172,21 +207,32 @@ const CheckInPage = () => {
       </RadioGroup>
 
       {!cameraUsing && (
-        <Autocomplete
-          options={kidOptions}
-          getOptionLabel={(option) => option.name}
-          onInputChange={(_: any, value) => setSearchInput(value)}
-          onChange={handleSelectKid}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Search Kid Name"
-              variant="outlined"
-              fullWidth
-              sx={{ mt: 2 }}
-            />
-          )}
-        />
+        <>
+          <Autocomplete
+            options={kidOptions}
+            getOptionLabel={(option) => option.name}
+            onInputChange={(_: any, value) => setSearchInput(value)}
+            onChange={handleSelectKid}
+            value={selectedKid}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Search Kid Name"
+                variant="outlined"
+                fullWidth
+                sx={{ mt: 2 }}
+              />
+            )}
+          />
+          <Button
+            variant="contained"
+            sx={{ mt: 2 }}
+            onClick={handleSubmit}
+            disabled={!searchInput.trim() && !selectedKid}
+          >
+            Submit
+          </Button>
+        </>
       )}
 
       {cameraUsing && !scannedResult && (
@@ -211,7 +257,7 @@ const CheckInPage = () => {
           readOnly: true,
         }}
       />
-      {checkedIn.length > 0 && (
+      {checkins.length > 0 && (
         <Paper sx={{ mt: 4 }}>
           <Typography variant="h6" sx={{ p: 2 }}>
             Checked-In Kids
@@ -220,16 +266,16 @@ const CheckInPage = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Kid Name</TableCell>
-                <TableCell>DOB</TableCell>
-                <TableCell>Gender</TableCell>
+                <TableCell>In</TableCell>
+                <TableCell>Out</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {checkedIn.map((kidOptions, index) => (
+              {checkins.map((chkin, index) => (
                 <TableRow key={index}>
-                  <TableCell>{kidOptions.name}</TableCell>
-                  <TableCell>{kidOptions.dob.split("T")[0]}</TableCell>
-                  <TableCell>{kidOptions.gender}</TableCell>
+                  <TableCell>{chkin.name}</TableCell>
+                  <TableCell>{chkin.checkin}</TableCell>
+                  <TableCell>{chkin.checkout}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

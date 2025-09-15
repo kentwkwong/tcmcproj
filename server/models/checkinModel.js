@@ -9,7 +9,7 @@ export async function getCheckinById(id){
 }
 
 export function getCheckinByDateAndName(date, name) {
-  return checkins().findOne({ date, name });
+  return checkins().findOne({ date, name, checkout: null });
 }
 
 export async function createCheckin({ date, name, refId = null }) {

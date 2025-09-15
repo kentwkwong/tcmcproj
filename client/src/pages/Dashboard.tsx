@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import axios from "../api/axios";
 import { Checkins } from "../types/Checkins";
 import { getTorontoDate } from "../components/Utility";
+import { toast } from "react-toastify";
 
 const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState<string>(getTorontoDate());
@@ -36,16 +37,16 @@ const Dashboard = () => {
 
   const handleCheckout = async (id: string) => {
     try {
-      await axios.put(`/checkin/checkout/${id}`);
+      const res = await axios.put(`/checkin/checkout/${id}`);
       await fetchCheckins(selectedDate);
-    } catch (err) {
+      toast.success(res.data.message);
+    } catch (err: any) {
       console.error("Error updating checkout:", err);
+      toast.error(err.response?.data.error);
     }
   };
 
   useEffect(() => {
-    console.log("start");
-    console.log(getTorontoDate());
     fetchCheckins(selectedDate);
   }, [selectedDate]);
 
