@@ -23,6 +23,7 @@ import * as Yup from "yup";
 import { useFormik } from "formik";
 import KidCard from "../components/KidCard";
 import { DatePicker } from "@mui/x-date-pickers";
+import { toast } from "react-toastify";
 
 const Profile = () => {
   const parentSchema = Yup.object().shape({
@@ -37,7 +38,6 @@ const Profile = () => {
 
   const [parent, setParent] = useState<Parents | null>(null);
   const [editing, setEditing] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(true); // for initial load
   const [submitting, setSubmitting] = useState(false); // for form submission
 
@@ -65,6 +65,7 @@ const Profile = () => {
       } else {
         await axios.post<Kid>("/kids", kidForm);
       }
+      toast.success(`${kidForm.name} saved successfully`);
       setKidForm({ name: "", dob: "", email: user?.email || "", gender: "M" });
       setEditingKidId(null);
       fetchKids();
@@ -84,6 +85,7 @@ const Profile = () => {
     setIsEditingKid(false);
     if (!id) return;
     await axios.delete(`/kids/${id}`);
+    toast.success(`Kid info deleted successfully`);
     fetchKids();
   };
 
@@ -114,7 +116,7 @@ const Profile = () => {
         } else {
           await axios.post<Parents>("/parents", values);
         }
-        setSuccess(true);
+        toast.success(`Parents info saved successfully`);
         setEditing(false);
         await fetchParent();
       } catch (err) {
@@ -135,7 +137,6 @@ const Profile = () => {
   }, [user?.email]);
 
   const handleEdit = async () => {
-    setSuccess(false);
     setEditing(!editing);
   };
 
@@ -184,12 +185,6 @@ const Profile = () => {
               {editing ? "Cancel" : "Update Parent Info"}
             </Button>
           </Grid>
-
-          {success && (
-            <Grid size={{ xs: 12 }}>
-              <Alert severity="success">Parent info updated!</Alert>
-            </Grid>
-          )}
 
           {editing && (
             <Grid size={12}>

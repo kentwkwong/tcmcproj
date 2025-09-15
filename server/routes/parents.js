@@ -40,9 +40,7 @@ router.post("/", async(req,res)=>{
 
 router.put("/:id", async(req, res)=>{
     try{
-        console.log(req.params);
         const query = {_id: new ObjectId(req.params.id)};
-        console.log(req.body);
         const updates = {
             $set:{
                 email: req.body.email,

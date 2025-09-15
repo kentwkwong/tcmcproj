@@ -23,8 +23,6 @@ router.get("/get/:email", async (req, res) => {
 router.post("/login", async (req, res) => {
     let result = await findUserByEmail(req.body.email);
     try{
-        console.log('req: ', req.body);
-        console.log('result: ', result);
         if (!result) {
             return res.status(404).json({ error: "Email not found" });
         }
@@ -57,18 +55,15 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/register", async (req,res)=>{
-    console.log("submit register")
     try{
         // if (req.body.email == 'kentwkwong@gmail.com') {
         //     return res.status(400).send("duplicate")
         // }
         
         try {
-            console.log(req.body);
             const { email, name, password } = req.body;
             // Check if user already exists
             const existingUser = await findUserByEmail(email);
-            console.log(existingUser);
             if (existingUser) {
               return res.status(409).json({ error: "User already exists" });
             }

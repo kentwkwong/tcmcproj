@@ -50,7 +50,6 @@ router.post('/:idOrName', async (req, res) => {
     let date = getTorontoDate();
     // Step 2: Check for existing check-in
     let existing = await getCheckinByDateAndName(date, name);
-    console.log(existing);
 
     if (existing) {
         return res.status(409).json({ error: `${name} is already checked in` });
@@ -80,7 +79,6 @@ router.put('/checkout/:id', async (req, res) => {
             return res.status(409).json({ error: `${rec.name} was checked out already` });
         }
         const result = await updateCheckoutTime(id);
-        console.log(result)
 
         res.status(201).json({
             message: `${result.name} checks out successfully`,
