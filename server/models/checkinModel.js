@@ -31,7 +31,6 @@ export async function updateCheckoutTime(id) {
 }
 
 export async function getCheckinsByDate(date) {
-    console.log(date)
   return checkins()
     .find({ date, checkout: null })
     .sort({ name: 1 }) 
@@ -39,7 +38,6 @@ export async function getCheckinsByDate(date) {
 }
 
 export async function getAllCheckinsByDate(date) {
-    console.log(date)
   return checkins()
     .find({ date })
     .sort({ name: 1 }) 

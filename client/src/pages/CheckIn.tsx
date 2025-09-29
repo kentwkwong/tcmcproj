@@ -82,8 +82,8 @@ const CheckInPage = () => {
             config,
             (decodedText) => {
               setScannedResult(decodedText);
-              console.log(decodedText);
               html5QrCodeRef.current?.stop();
+              processSubmit(decodedText);
             },
             () => {}
           )
@@ -151,24 +151,32 @@ const CheckInPage = () => {
   useEffect(() => {}, [selectedKid]);
 
   const handleSelectKid = (_: any, value: Kid | null) => {
-    // if (value && !checkedIn.some((k) => k.name === value.name)) {
-    //   setCheckedIn((prev) => [...prev, value]);
-    // }
     setSelectedKid(value);
+  };
+
+  const processSubmit = async (idOrName: string) => {
+    try {
+      let res = await axios.post(`/checkin/${idOrName}`);
+      toast.success(res.data.message);
+    } catch (err: any) {
+      console.error("Submission failed:", err);
+      toast.error(err.response?.data.error);
+    }
   };
 
   const handleSubmit = async () => {
     try {
       let name = selectedKid?.name;
       if (selectedKid) {
-        await axios.post(`/checkin/${selectedKid._id}`);
+        processSubmit(selectedKid._id!);
       } else if (searchInput.trim()) {
         name = searchInput.trim();
-        await axios.post("/checkin", { idOrName: searchInput.trim() });
+        processSubmit(name);
+        // await axios.post("/checkin", { idOrName: searchInput.trim() });
       } else {
         console.warn("No input provided");
       }
-      toast.success(`${name} check in successfully! 🎉 `);
+      // toast.success(`${name} check in successfully! 🎉 `);
     } catch (err: any) {
       console.error("Submission failed:", err);
       toast.error(err.response?.data.error);

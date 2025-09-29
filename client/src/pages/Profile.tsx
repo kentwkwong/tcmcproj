@@ -27,10 +27,8 @@ import { toast } from "react-toastify";
 const Profile = () => {
   const parentSchema = Yup.object().shape({
     email: Yup.string().email("Invalid email").required("Email is required"),
-    mom: Yup.string().required("Mom's name is required"),
-    momphone: Yup.string().required("Mom's phone is required"),
-    dad: Yup.string().required("Dad's name is required"),
-    dadphone: Yup.string().required("Dad's phone is required"),
+    mom: Yup.string().required("Primary contact name is required"),
+    momphone: Yup.string().required("Primary contact phone is required"),
   });
 
   const { user } = useAuth();
@@ -115,7 +113,7 @@ const Profile = () => {
         } else {
           await axios.post<Parents>("/parents", values);
         }
-        toast.success(`Parents info saved successfully`);
+        toast.success(`Contact info saved successfully`);
         setEditing(false);
         await fetchParent();
       } catch (err) {
@@ -151,7 +149,7 @@ const Profile = () => {
       <Box sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 4 } }}>
         <center>
           <Typography variant="h6" gutterBottom>
-            👤 Parent Contact Info
+            👤 Guardian / Parent Contact Info
           </Typography>
         </center>
         {/* Parent Info */}
@@ -163,7 +161,7 @@ const Profile = () => {
 
           <Grid size={{ xs: 12, sm: 6 }}>
             <Typography variant="body1" color="text.secondary">
-              Mom:
+              Guardian / Mom:
             </Typography>
             <Typography variant="body2">
               {parent?.mom} ({parent?.momphone})
@@ -172,7 +170,7 @@ const Profile = () => {
 
           <Grid size={{ xs: 12, sm: 6 }}>
             <Typography variant="body1" color="text.secondary">
-              Dad:
+              Guardian / Dad:
             </Typography>
             <Typography variant="body2">
               {parent?.dad} ({parent?.dadphone})
@@ -181,7 +179,7 @@ const Profile = () => {
 
           <Grid size={12}>
             <Button variant="outlined" fullWidth onClick={handleEdit}>
-              {editing ? "Cancel" : "Update Parent Info"}
+              {editing ? "Cancel" : "Update Contact Info"}
             </Button>
           </Grid>
 
@@ -191,7 +189,7 @@ const Profile = () => {
                 <Stack spacing={2} mt={2}>
                   <TextField
                     fullWidth
-                    label="Mom's Name"
+                    label="Guardian / Mom Name"
                     name="mom"
                     value={formik.values.mom}
                     onChange={formik.handleChange}
@@ -201,7 +199,7 @@ const Profile = () => {
                   />
                   <TextField
                     fullWidth
-                    label="Mom's Phone"
+                    label="Guardian / Mom Phone"
                     name="momphone"
                     value={formik.values.momphone}
                     onChange={formik.handleChange}
@@ -215,7 +213,7 @@ const Profile = () => {
                   />
                   <TextField
                     fullWidth
-                    label="Dad's Name"
+                    label="Guardian / Dad Name"
                     name="dad"
                     value={formik.values.dad}
                     onChange={formik.handleChange}
@@ -225,7 +223,7 @@ const Profile = () => {
                   />
                   <TextField
                     fullWidth
-                    label="Dad's Phone"
+                    label="Guardian / Dad Phone"
                     name="dadphone"
                     value={formik.values.dadphone}
                     onChange={formik.handleChange}
