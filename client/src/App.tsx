@@ -10,6 +10,7 @@ import Register from "./pages/Register";
 import CheckIn from "./pages/CheckIn";
 import Kids from "./pages/Kids";
 import Profile from "./pages/Profile";
+import Users from "./pages/Users";
 // import Kids from "./pages/Kids";
 
 const App: React.FC = () => {
@@ -40,6 +41,14 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/useradmin"
+          element={
+            <ProtectedRoute>
+              <Users />
             </ProtectedRoute>
           }
         />

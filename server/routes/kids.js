@@ -2,7 +2,8 @@ import express from "express";
 
 import db from "../db/connection.js";
 import { ObjectId } from "mongodb";
-import {getKidsByName} from "../models/kidModel.js"
+import {getKidsByName,findKidById} from "../models/kidModel.js"
+import { findParentByEmail } from "../models/parentModel.js"
 
 const router = express.Router();
 
@@ -43,6 +44,25 @@ router.get('/getkidsbyname/:keywords', async (req, res) => {
     let results = await getKidsByName(keywords);
     res.send(results).status(200);
 });
+
+router.get('/getparentinfobykidid/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const kid = await findKidById(id);
+    if (!kid) {
+      return res.status(404).json({ error: "Kid not found" });
+    }
+    const result = await findParentByEmail(kid.email);
+    if (!result) {
+        return res.status(404).json({ error: "Parent not found" });
+    }
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Error fetching kid by ID:", err);
+    res.status(500).json({ error: "Failed to fetch kid" });
+  }
+});
+
 
 router.put('/:id', async (req, res) => {
     try {

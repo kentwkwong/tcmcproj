@@ -23,12 +23,6 @@ const Navbar: React.FC = () => {
     setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
-  // const navLinks = [
-  //   { label: "Home", path: "/" },
-  //   { label: "About", path: "/about" },
-  //   { label: "CheckIn", path: "/checkin" },
-  // ];
-
   return (
     <>
       <AppBar position="fixed">
@@ -64,19 +58,6 @@ const Navbar: React.FC = () => {
             </Box>
           </Box>
 
-          {/* <Box sx={{ display: { xs: "none", sm: "flex" }, gap: 2 }}>
-            {navLinks.map((link) => (
-              <Button
-                key={link.path}
-                color="inherit"
-                component={Link}
-                to={link.path}
-              >
-                {link.label}
-              </Button>
-            ))}
-          </Box> */}
-
           {!user ? (
             <Box></Box>
           ) : (
@@ -94,20 +75,48 @@ const Navbar: React.FC = () => {
                 <MenuItem component={Link} to="/profile" onClick={handleClose}>
                   Profile
                 </MenuItem>
-                {/* <MenuItem component={Link} to="/kids" onClick={handleClose}>
-                  Kids
-                </MenuItem> */}
-                <MenuItem
+                {user.role === "A" && (
+                  <Box>
+                    <MenuItem
+                      component={Link}
+                      to="/dashboard"
+                      onClick={handleClose}
+                    >
+                      Dashboard
+                    </MenuItem>
+                    <MenuItem
+                      component={Link}
+                      to="/useradmin"
+                      onClick={handleClose}
+                    >
+                      UserAdmin
+                    </MenuItem>
+                    <MenuItem
+                      component={Link}
+                      to="/checkin"
+                      onClick={handleClose}
+                    >
+                      CheckIn
+                    </MenuItem>
+                  </Box>
+                )}
+                {/* <MenuItem
                   component={Link}
                   to="/dashboard"
                   onClick={handleClose}
                 >
                   Dashboard
                 </MenuItem>
-
+                <MenuItem
+                  component={Link}
+                  to="/useradmin"
+                  onClick={handleClose}
+                >
+                  UserAdmin
+                </MenuItem>
                 <MenuItem component={Link} to="/checkin" onClick={handleClose}>
                   CheckIn
-                </MenuItem>
+                </MenuItem> */}
                 <MenuItem
                   onClick={() => {
                     handleClose();

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "../api/axios";
 import { User } from "../types/User";
+import { PromptMomentNotification } from "@react-oauth/google";
 
 interface AuthContextType {
   user: User | null;
@@ -30,9 +31,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = () => {
     if (window.google?.accounts?.id) {
-      window.google.accounts.id.prompt();
+      window.google.accounts.id.prompt(
+        (notification: PromptMomentNotification) => {
+          if (notification.isNotDisplayed()) {
+            console.warn(
+              "FedCM prompt not displayed:",
+              notification.getNotDisplayedReason()
+            );
+          }
+        }
+      );
     }
   };
+
+  // const login = () => {
+  //   if (window.google?.accounts?.id) {
+  //     window.google.accounts.id.prompt();
+  //   }
+  // };
 
   const logout = async () => {
     try {

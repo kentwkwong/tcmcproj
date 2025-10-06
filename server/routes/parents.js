@@ -2,6 +2,7 @@ import express from "express";
 
 import db from "../db/connection.js";
 import { ObjectId } from "mongodb";
+import { findParentByEmail } from "../models/parentModel.js"
 
 const router = express.Router();
 
@@ -12,12 +13,15 @@ router.get('/', async (req, res) => {
 });
 
 router.get("/:email", async (req, res) => {
-    let collection = await db.collection("parents");   
-    let query = {email: req.params.email};
-    let result = await collection.findOne(query);
-
-    if(!result) res.send("Not found").status(404);
-    else res.send(result).status(200);
+    try{
+        let email = req.params.email;
+        let result = await findParentByEmail()
+        if(!result) res.send("Not found").status(404);
+        else res.send(result).status(204);
+    } catch (err){
+        console.error(err);
+        res.status(500).send("Error Insert");
+    }
 });
 
 router.post("/", async(req,res)=>{

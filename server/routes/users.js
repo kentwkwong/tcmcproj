@@ -4,15 +4,43 @@ import db from "../db/connection.js";
 import { ObjectId } from "mongodb";
 import axios from "axios";
 import jwt from 'jsonwebtoken';
-import {findUserByEmail, createUser, verifyPassword} from "../models/userModel.js";
+import {findUserByEmail, createUser, verifyPassword, fetchAllUsers, updateUserRole} from "../models/userModel.js";
 
 const router = express.Router();
 
-router.get('/getall', async (req, res) => {
-    let collection = await db.collection("users");
-    let results = await collection.find({}).toArray();
-    res.send(results).status(200);
+// router.get('/getall', async (req, res) => {
+//     let collection = await db.collection("users");
+//     let results = await collection.find({}).toArray();
+//     res.send(results).status(200);
+// });
+router.get("/getall", async (req, res) => {
+  try {
+    const users = await fetchAllUsers();
+    res.status(200).json(users);
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
 });
+
+router.put("/role/:id", async (req, res) => {
+  try {
+    const { role } = req.body;
+    const { id } = req.params;
+
+    const updated = await updateUserRole(id, role);
+    console.log("updated: " + updated)
+    if (!updated) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({message: `${updated.email} updated!`});
+  } catch (err) {
+    console.error("Error updating role:", err);
+    res.status(500).json({ error: err.message || "Failed to update role" });
+  }
+});
+
 
 router.get("/get/:email", async (req, res) => {
     let result = findUserByEmail(req.params.email);
@@ -33,7 +61,7 @@ router.post("/login", async (req, res) => {
         }
 
         const token = jwt.sign(
-            { email: result.email, name: result.name },
+            { email: result.email, name: result.name, role: result.role },
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
         );
@@ -56,10 +84,6 @@ router.post("/login", async (req, res) => {
 
 router.post("/register", async (req,res)=>{
     try{
-        // if (req.body.email == 'kentwkwong@gmail.com') {
-        //     return res.status(400).send("duplicate")
-        // }
-        
         try {
             const { email, name, password } = req.body;
             // Check if user already exists
@@ -71,7 +95,7 @@ router.post("/register", async (req,res)=>{
             await createUser({email, name, password});        
             // Create JWT token
             const token = jwt.sign(
-              { email, name },
+              { email, name, role: 'U' },
               process.env.JWT_SECRET,
               { expiresIn: "1h" }
             );
@@ -135,7 +159,12 @@ router.post("/auth/google", async (req, res) => {
     try {
       const googleRes = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
       const { email, name, picture, sub } = googleRes.data;
-      const token = jwt.sign({ email, name, picture, sub }, process.env.JWT_SECRET, {
+      // Get user role
+        let user = await findUserByEmail(email);
+        if (!user){
+            user = await createUser(email, name, '');
+        }
+      const token = jwt.sign({ email, name, picture, role: user.role }, process.env.JWT_SECRET, {
         expiresIn: "1h",
       });
       res.cookie("accessToken", token, {

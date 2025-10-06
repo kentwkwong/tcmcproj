@@ -18,6 +18,9 @@ import axios from "../api/axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+// import { account } from "../context/AppWrite";
+// import { OAuthProvider } from "appwrite";
+
 const schema = yup.object({
   email: yup.string().email("Invalid email").required("Email is required"),
   password: yup
@@ -33,7 +36,11 @@ const Login = () => {
   const navigate = useNavigate();
   useEffect(() => {
     if (user) {
-      navigate("/dashboard"); // or your target page
+      if (user.role === "A") {
+        navigate("/dashboard");
+      } else {
+        navigate("/profile");
+      }
     }
   }, [user, navigate]);
 
@@ -44,6 +51,14 @@ const Login = () => {
   } = useForm<FormData>({
     resolver: yupResolver(schema),
   });
+
+  // const loginAppWrite = () => {
+  //   account.createOAuth2Session(
+  //     OAuthProvider.Google,
+  //     "http://localhost:5173/",
+  //     "http://localhost:5173/"
+  //   );
+  // };
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -72,16 +87,7 @@ const Login = () => {
   };
 
   return (
-    <Box
-    //   sx={{
-    //     height: "100vh",
-    //     display: "flex",
-    //     alignItems: "center",
-    //     justifyContent: "center",
-    //     bgcolor: "background.default",
-    //     px: 2,
-    //   }}
-    >
+    <Box>
       <Container maxWidth="xs">
         <Paper elevation={3} sx={{ p: 3, mt: 6 }}>
           <Typography variant="h5" align="left" gutterBottom>
@@ -105,6 +111,15 @@ const Login = () => {
               error={!!errors.password}
               helperText={errors.password?.message}
             />
+            {/* <Button
+              startIcon={<Google />}
+              variant="outlined"
+              fullWidth
+              onClick={loginAppWrite}
+              sx={{ mt: 2 }}
+            >
+              Sign in with AppWrite
+            </Button> */}
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 2 }}>
               Sign In
             </Button>

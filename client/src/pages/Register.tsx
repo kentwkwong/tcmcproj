@@ -56,14 +56,7 @@ const Register = () => {
       });
       console.log(res.data);
       reset();
-      toast.success(
-        "Registered successfully! 🎉 Redirecting..."
-        //   , {
-        //   position: "top-center",
-        //   theme: "dark",
-        //   autoClose: 1000,
-        // }
-      );
+      toast.success("Registered successfully! 🎉 Redirecting...");
       setTimeout(() => {
         window.location.href = "/dashboard";
       }, 1500);
