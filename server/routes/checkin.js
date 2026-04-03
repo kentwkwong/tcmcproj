@@ -44,7 +44,7 @@ router.post('/:idOrName', async (req, res) => {
         name = result.name;
         refId = result._id;
     } else {
-        name = idOrName + " (new)";
+        name = idOrName;
     }
 
     let date = getTorontoDate();

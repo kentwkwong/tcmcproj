@@ -158,7 +158,7 @@ router.post("/auth/google", async (req, res) => {
     if (!credential) return res.status(400).send("Missing credential");
     try {
       const googleRes = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
-      const { email, name, picture, sub } = googleRes.data;
+      const { email, name, picture } = googleRes.data;
       // Get user role
         let user = await findUserByEmail(email);
         if (!user){

@@ -9,30 +9,46 @@ interface UseQrScannerProps {
 
 export const useQrScanner = ({ qrRegionId, onScan }: UseQrScannerProps) => {
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
+  const startingRef = useRef(false);
+  const stoppingRef = useRef(false);
+  const isLockedRef = useRef(false);
+  const counter = useRef(0);
+
   const [cameraUsing, setCameraUsing] = useState(false);
   const [scannedResult, setScannedResult] = useState<string | null>(null);
 
-  const stopScanner = useCallback(async () => {
-    setCameraUsing(false);
+  const stopScanner = useCallback(() => {
+    if (!html5QrCodeRef.current) return;
+    if (stoppingRef.current) return;
 
-    if (html5QrCodeRef.current) {
+    stoppingRef.current = true;
+
+    (() => {
       try {
-        if (
-          html5QrCodeRef.current.getState() === Html5QrcodeScannerState.SCANNING
-        ) {
-          await html5QrCodeRef.current.stop();
+        const state = html5QrCodeRef.current!.getState();
+
+        if (state === Html5QrcodeScannerState.SCANNING) {
+          html5QrCodeRef.current!.stop();
         }
-        await html5QrCodeRef.current.clear();
+
+        // Wait for stop transition to finish
+        new Promise((res) => setTimeout(res, 120));
+
+        html5QrCodeRef.current!.clear();
       } catch (err) {
         console.error("Error stopping scanner:", err);
       }
+
       html5QrCodeRef.current = null;
-    }
+      stoppingRef.current = false;
+    })();
   }, []);
 
   const startScanner = useCallback(() => {
+    if (startingRef.current) return;
+    startingRef.current = true;
+
     setScannedResult(null);
-    setCameraUsing(true);
 
     const config = {
       fps: 10,
@@ -42,13 +58,14 @@ export const useQrScanner = ({ qrRegionId, onScan }: UseQrScannerProps) => {
     };
 
     Html5Qrcode.getCameras()
-      .then((devices) => {
+      .then(async (devices) => {
         if (devices.length === 0) {
           toast.error("No cameras found.");
+          startingRef.current = false;
           return;
         }
 
-        let selectedDevice =
+        const selectedDevice =
           devices.find((d) => d.label.toLowerCase().includes("back")) ??
           devices[devices.length - 1];
 
@@ -57,25 +74,38 @@ export const useQrScanner = ({ qrRegionId, onScan }: UseQrScannerProps) => {
         }
 
         html5QrCodeRef.current
-          .start(
+          ?.start(
             { deviceId: selectedDevice.id },
             config,
-            async (decodedText) => {
-              await html5QrCodeRef.current?.pause(true);
-              setScannedResult(decodedText);
-              onScan(decodedText);
+            (text) => {
+              console.log(counter.current + " : " + isLockedRef.current);
+              if (isLockedRef.current) return;
+              isLockedRef.current = true;
+              setScannedResult(text);
+              onScan(text);
+              counter.current++;
+
+              setTimeout(() => {
+                isLockedRef.current = false;
+                console.log("Scanner ready for next code");
+              }, 2000);
             },
             () => {},
           )
-          .catch((err) => toast.error("Failed to start scanner: " + err));
+          .catch((err) => console.error("Start error:", err));
       })
-      .catch((err) => toast.error("Error fetching camera devices: " + err));
+      .catch((err) => toast.error("Error fetching camera devices: " + err))
+      .finally(() => {
+        startingRef.current = false;
+      });
   }, [qrRegionId, onScan]);
 
   useEffect(() => {
     if (cameraUsing) startScanner();
+    else stopScanner();
+
     return () => {
-      stopScanner();
+      void stopScanner();
     };
   }, [cameraUsing, startScanner, stopScanner]);
 

@@ -14,20 +14,19 @@ import {
   TableRow,
   Paper,
   Autocomplete,
+  Box,
   Button,
 } from "@mui/material";
 import axios from "../api/axios";
-import { Kid } from "../types/Kid";
+// import { Kid } from "../types/Kid";
 import { Checkins } from "../types/Checkins";
 import { getTorontoDate } from "../components/Utility";
 import { toast } from "react-toastify";
 import { useQrScanner } from "../components/UseQrScanner";
+import { useKidSearch } from "../components/UseKidSearch";
 
 const CheckInPage = () => {
-  const [kidOptions, setKidOptions] = useState<Kid[]>([]);
-  const [selectedKid, setSelectedKid] = useState<Kid | null>(null);
   const [checkins, setCheckins] = useState<Checkins[]>([]);
-  const [searchInput, setSearchInput] = useState("");
   const today = getTorontoDate();
   const qrCodeRegionId = "qr-reader";
 
@@ -59,39 +58,18 @@ const CheckInPage = () => {
     fetchCheckin();
   }, []);
 
-  useEffect(() => {
-    const controller = new AbortController();
-
-    const fetchKids = async () => {
-      if (!searchInput.trim()) {
-        setKidOptions([]);
-        return;
-      }
-
-      try {
-        const res = await axios.get(`/kids/getkidsbyname/${searchInput}`, {
-          signal: controller.signal,
-        });
-        setKidOptions(res.data);
-      } catch (err) {}
-    };
-
-    const debounce = setTimeout(fetchKids, 300);
-    return () => {
-      clearTimeout(debounce);
-      controller.abort();
-    };
-  }, [searchInput]);
-
-  const handleSubmit = () => {
-    if (selectedKid) {
-      processSubmit(selectedKid._id!);
-    } else if (searchInput.trim()) {
-      processSubmit(searchInput.trim());
-    }
-    setSearchInput("");
-    setSelectedKid(null);
-  };
+  const {
+    kidOptions,
+    selectedKid,
+    setSelectedKid,
+    setSearchInput,
+    guestName,
+    setGuestName,
+    guestPhone,
+    handlePhoneChange,
+    handleSearchSubmit,
+    isSubmitDisabled,
+  } = useKidSearch({ onCheckIn: processSubmit });
 
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
@@ -139,11 +117,36 @@ const CheckInPage = () => {
               />
             )}
           />
+          {selectedKid && !selectedKid._id && (
+            <Box
+              sx={{ mt: 2, p: 2, border: "1px solid #ddd", borderRadius: 1 }}
+            >
+              <Typography variant="subtitle2" color="error" sx={{ mb: 1 }}>
+                * Guest Information Required
+              </Typography>
+              <TextField
+                label="Guest Kid Name"
+                fullWidth
+                required
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                label="Phone Number"
+                fullWidth
+                required
+                placeholder="(000) 000-0000"
+                value={guestPhone}
+                onChange={(e) => handlePhoneChange(e.target.value)}
+              />
+            </Box>
+          )}
           <Button
             variant="contained"
             sx={{ mt: 2 }}
-            onClick={handleSubmit}
-            disabled={!searchInput.trim() && !selectedKid}
+            onClick={handleSearchSubmit}
+            disabled={isSubmitDisabled}
           >
             Submit
           </Button>
@@ -162,16 +165,7 @@ const CheckInPage = () => {
           style={{ width: "100%", marginTop: "20px" }}
         ></div>
       )}
-      <TextField
-        label="Scanned Result"
-        variant="outlined"
-        fullWidth
-        value={scannedResult ?? ""}
-        sx={{ mt: 2 }}
-        InputProps={{
-          readOnly: true,
-        }}
-      />
+
       {checkins.length > 0 && (
         <Paper sx={{ mt: 4 }}>
           <Typography variant="h6" sx={{ p: 2 }}>
