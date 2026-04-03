@@ -23,7 +23,10 @@ const KidCard: React.FC<Props> = ({ kid, onEdit, onDelete }) => {
 
         {kid._id && (
           <Box mt={2}>
-            <StyledQRCode value={kid._id} />
+            <StyledQRCode
+              value={kid._id}
+              size={Math.min(window.innerWidth * 0.6, 200)}
+            />
           </Box>
         )}
 
