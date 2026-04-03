@@ -323,7 +323,7 @@ const Profile = () => {
           <Grid container spacing={2}>
             {kids.length > 0 ? (
               kids.map((kid) => (
-                <Grid size={6} key={kid._id}>
+                <Grid size={{ xs: 12, sm: 6 }} key={kid._id}>
                   <KidCard
                     kid={kid}
                     onEdit={handleKidEdit}

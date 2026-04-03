@@ -1,5 +1,5 @@
 // CheckInPage.jsx
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Container,
   Typography,
@@ -16,109 +16,48 @@ import {
   Autocomplete,
   Button,
 } from "@mui/material";
-import { Html5Qrcode } from "html5-qrcode";
 import axios from "../api/axios";
 import { Kid } from "../types/Kid";
 import { Checkins } from "../types/Checkins";
 import { getTorontoDate } from "../components/Utility";
 import { toast } from "react-toastify";
-// import { Checkins } from "../types/Checkins";
+import { useQrScanner } from "../components/UseQrScanner";
 
 const CheckInPage = () => {
   const [kidOptions, setKidOptions] = useState<Kid[]>([]);
   const [selectedKid, setSelectedKid] = useState<Kid | null>(null);
   const [checkins, setCheckins] = useState<Checkins[]>([]);
   const [searchInput, setSearchInput] = useState("");
-  // const [loading, setLoading] = useState(false);
+  const today = getTorontoDate();
   const qrCodeRegionId = "qr-reader";
 
-  const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
-  const [cameraUsing, setCameraUsing] = useState(false);
-  const [scannedResult, setScannedResult] = useState<string | null>(null);
-
-  const today = getTorontoDate();
-
-  const stopScanner = async () => {
-    setCameraUsing(false);
-    if (html5QrCodeRef.current) {
-      await html5QrCodeRef.current.stop();
-      await html5QrCodeRef.current.clear();
-      html5QrCodeRef.current = null;
+  const processSubmit = async (idOrName: string) => {
+    try {
+      const res = await axios.post(`/checkin/${idOrName}`);
+      toast.success(res.data.message);
+      fetchCheckin();
+    } catch (err: any) {
+      toast.error(err.response?.data.error);
     }
   };
-  const startScanner = () => {
-    setScannedResult(null);
-    setCameraUsing(true);
-    const config = {
-      fps: 10,
-      qrbox: { width: 250, height: 250 },
-      aspectRatio: 1.77,
-      disableFlip: true,
-    }; // Scanner configuration
 
-    Html5Qrcode.getCameras()
-      .then((devices) => {
-        if (devices.length === 0) {
-          toast.error("No cameras found.");
-          return;
-        }
-
-        // Try to find a back-facing camera
-        let selectedDevice = devices.find((d) =>
-          d.label.toLowerCase().includes("back")
-        );
-        if (!selectedDevice) {
-          selectedDevice =
-            devices.length > 1 ? devices[devices.length - 1] : devices[0];
-        }
-
-        if (!html5QrCodeRef.current) {
-          html5QrCodeRef.current = new Html5Qrcode(qrCodeRegionId);
-        }
-
-        html5QrCodeRef.current
-          .start(
-            { deviceId: selectedDevice.id },
-            config,
-            (decodedText) => {
-              setScannedResult(decodedText);
-              html5QrCodeRef.current?.stop();
-              processSubmit(decodedText);
-            },
-            () => {}
-          )
-          .catch((err) => {
-            toast.error("Failed to start scanner: " + err);
-          });
-      })
-      .catch((err) => {
-        toast.error("Error fetching camera devices: " + err);
-      });
-  };
-
-  useEffect(() => {
-    if (cameraUsing) {
-      startScanner();
-    }
-
-    return () => {
-      stopScanner();
-    };
-  }, [cameraUsing]);
-
-  useEffect(() => {
-    fetchCheckin();
-  }, [checkins]);
+  const { cameraUsing, setCameraUsing, scannedResult } = useQrScanner({
+    qrRegionId: qrCodeRegionId,
+    onScan: processSubmit,
+  });
 
   const fetchCheckin = async () => {
     try {
       const res = await axios.get(`/checkin/getallcheckinsbydate/${today}`);
       setCheckins(res.data);
     } catch (err: any) {
-      console.error("Error fetching check-ins:", err);
       toast.error(err.response?.data.error);
     }
   };
+
+  useEffect(() => {
+    fetchCheckin();
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -134,56 +73,24 @@ const CheckInPage = () => {
           signal: controller.signal,
         });
         setKidOptions(res.data);
-      } catch (err) {
-        if ((err as any)?.code === "ERR_CANCELED") return;
-        console.error("Error fetching kids:", err);
-      }
+      } catch (err) {}
     };
 
-    const debounce = setTimeout(fetchKids, 300); // debounce input
-
+    const debounce = setTimeout(fetchKids, 300);
     return () => {
       clearTimeout(debounce);
       controller.abort();
     };
   }, [searchInput]);
 
-  useEffect(() => {}, [selectedKid]);
-
-  const handleSelectKid = (_: any, value: Kid | null) => {
-    setSelectedKid(value);
-  };
-
-  const processSubmit = async (idOrName: string) => {
-    try {
-      let res = await axios.post(`/checkin/${idOrName}`);
-      toast.success(res.data.message);
-    } catch (err: any) {
-      console.error("Submission failed:", err);
-      toast.error(err.response?.data.error);
-    }
-  };
-
-  const handleSubmit = async () => {
-    try {
-      let name = selectedKid?.name;
-      if (selectedKid) {
-        processSubmit(selectedKid._id!);
-      } else if (searchInput.trim()) {
-        name = searchInput.trim();
-        processSubmit(name);
-        // await axios.post("/checkin", { idOrName: searchInput.trim() });
-      } else {
-        console.warn("No input provided");
-      }
-      // toast.success(`${name} check in successfully! 🎉 `);
-    } catch (err: any) {
-      console.error("Submission failed:", err);
-      toast.error(err.response?.data.error);
+  const handleSubmit = () => {
+    if (selectedKid) {
+      processSubmit(selectedKid._id!);
+    } else if (searchInput.trim()) {
+      processSubmit(searchInput.trim());
     }
     setSearchInput("");
     setSelectedKid(null);
-    fetchCheckin();
   };
 
   return (
@@ -220,7 +127,7 @@ const CheckInPage = () => {
             options={kidOptions}
             getOptionLabel={(option) => option.name}
             onInputChange={(_: any, value) => setSearchInput(value)}
-            onChange={handleSelectKid}
+            onChange={(_, value) => setSelectedKid(value)}
             value={selectedKid}
             renderInput={(params) => (
               <TextField
