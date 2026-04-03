@@ -61,7 +61,7 @@ export const useKidSearch = ({ onCheckIn }: UseKidSearchProps) => {
       clearTimeout(debounce);
       controller.abort();
     };
-  }, [searchInput]);
+  }, [setSearchInput]);
 
   const handleSearchSubmit = async () => {
     if (!selectedKid?._id) {
