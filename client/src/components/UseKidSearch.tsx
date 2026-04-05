@@ -51,7 +51,10 @@ export const useKidSearch = ({ onCheckIn }: UseKidSearchProps) => {
         } else {
           setKidOptions(res.data);
         }
-      } catch (err) {
+      } catch (err: any) {
+        if (err.name === "CanceledError" || err.name === "AbortError") {
+          return;
+        }
         setKidOptions([guestKid]);
       }
     };
