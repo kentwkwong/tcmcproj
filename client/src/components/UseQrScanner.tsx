@@ -50,11 +50,24 @@ export const useQrScanner = ({ qrRegionId, onScan }: UseQrScannerProps) => {
 
     setScannedResult(null);
 
+    // const config = {
+    //   fps: 10,
+    //   qrbox: { width: 250, height: 250 },
+    //   aspectRatio: 1.77,
+    //   disableFlip: true,
+    // };
     const config = {
       fps: 10,
-      qrbox: { width: 250, height: 250 },
-      aspectRatio: 1.77,
+      qrbox: { width: 320, height: 320 }, // bigger box for iPad
       disableFlip: true,
+      experimentalFeatures: {
+        useBarCodeDetectorIfSupported: true,
+      },
+      videoConstraints: {
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+        facingMode: "environment", // fallback
+      },
     };
 
     Html5Qrcode.getCameras()
@@ -75,7 +88,8 @@ export const useQrScanner = ({ qrRegionId, onScan }: UseQrScannerProps) => {
 
         html5QrCodeRef.current
           ?.start(
-            { deviceId: selectedDevice.id },
+            // { deviceId: selectedDevice.id },
+            selectedDevice.id,
             config,
             (text) => {
               console.log(counter.current + " : " + isLockedRef.current);
