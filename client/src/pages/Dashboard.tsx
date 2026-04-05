@@ -42,6 +42,7 @@ const Dashboard = () => {
 
   const handleKidClick = async (id: string) => {
     try {
+      if (id === "") return;
       const res = await axios.get(`/kids/getparentinfobykidid/${id}`);
       setSelectedParent(res.data);
     } catch (err) {
@@ -104,13 +105,17 @@ const Dashboard = () => {
             </TableHead>
             <TableBody>
               {checkins.map((record) => (
-                <TableRow
-                  key={record._id}
-                  hover
-                  sx={{ cursor: "pointer" }}
-                  onClick={() => handleKidClick(record.refId || "")}
-                >
-                  <TableCell>{record.name}</TableCell>
+                <TableRow key={record._id} hover>
+                  <TableCell
+                    onClick={() => handleKidClick(record.refId || "")}
+                    sx={{
+                      cursor: "pointer",
+                      color: "primary.main",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {record.name}
+                  </TableCell>
                   <TableCell>{record.checkin}</TableCell>
                   <TableCell>{record.checkout}</TableCell>
                   <TableCell>
