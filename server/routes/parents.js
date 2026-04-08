@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
 router.get("/:email", async (req, res) => {
     try{
         let email = req.params.email;
-        let result = await findParentByEmail()
+        let result = await findParentByEmail(email)
         if(!result) res.send("Not found").status(404);
         else res.send(result).status(204);
     } catch (err){
