@@ -4,14 +4,13 @@ import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
-// import Profile from "./pages/Profile";
 import About from "./pages/About";
 import Register from "./pages/Register";
 import CheckIn from "./pages/CheckIn";
 import Kids from "./pages/Kids";
 import Profile from "./pages/Profile";
 import Users from "./pages/Users";
-// import Kids from "./pages/Kids";
+import Report from "./pages/Report";
 
 const App: React.FC = () => {
   return (
@@ -57,6 +56,14 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <CheckIn />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/report"
+          element={
+            <ProtectedRoute>
+              <Report />
             </ProtectedRoute>
           }
         />

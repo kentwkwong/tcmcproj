@@ -43,3 +43,15 @@ export async function getAllCheckinsByDate(date) {
     .sort({ name: 1 }) 
     .toArray();
 }
+
+export async function getAllCheckinsByDateFromTo(from, to) {
+  return checkins()
+    .find({
+      date: {
+        $gte: from,
+        $lte: to
+      }
+    })
+    .sort({ date: 1, name: 1 }) // Primary sort by date, secondary by name
+    .toArray();
+}

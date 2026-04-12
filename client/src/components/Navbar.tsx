@@ -98,6 +98,13 @@ const Navbar: React.FC = () => {
                     >
                       CheckIn
                     </MenuItem>
+                    <MenuItem
+                      component={Link}
+                      to="/report"
+                      onClick={handleClose}
+                    >
+                      Report
+                    </MenuItem>
                   </Box>
                 )}
                 {/* <MenuItem

@@ -8,7 +8,8 @@ import {
     updateCheckoutTime, 
     getCheckinsByDate, 
     getCheckinByDateAndName,
-    getAllCheckinsByDate
+    getAllCheckinsByDate,
+    getAllCheckinsByDateFromTo
 } from "../models/checkinModel.js"
 import { findKidById } from "../models/kidModel.js";
 const router = express.Router();
@@ -29,6 +30,16 @@ router.get('/getcheckinsbydate/:checkindate', async (req, res) => {
 router.get('/getallcheckinsbydate/:checkindate', async (req, res) => {
     let checkindate = req.params.checkindate
     const result = await getAllCheckinsByDate(checkindate);
+    res.send(result).status(200);
+});
+
+router.get('/getallcheckinsbydatefromto', async (req, res) => {
+    const { from, to } = req.query;
+    if (!from || !to) {
+        return res.status(400).send({ error: "Both 'from' and 'to' dates are required." });
+    }
+
+    const result = await getAllCheckinsByDateFromTo(from, to);
     res.send(result).status(200);
 });
 

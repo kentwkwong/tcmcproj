@@ -148,7 +148,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (res.data?.success) {
         await fetchUser();
       }
-    } catch (err) {
+    } catch (err: any) {
+      console.error("Backend 401 Message:", err.response?.data);
       console.error("Google login backend verification failed", err);
     }
   };
@@ -176,7 +177,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const res = await axios.get(`/users/gettoken`, { withCredentials: true });
       setUser(res.data.user);
-    } catch (err) {
+    } catch (err: any) {
+      // If it's a 401, it just means the session doesn't exist yet.
+      // Don't treat it as a "crash" error.
+      if (err.response?.status !== 401) {
+        console.error("User fetch failed unexpectedly", err);
+      }
       setUser(null);
     } finally {
       setIsLoading(false);

@@ -176,8 +176,9 @@ router.post("/auth/google", async (req, res) => {
   
       res.json({ success: true });
     } catch (err) {
-      console.error("Google login error:", err.message);
-      res.status(401).json({ error: "Invalid Google token" });}
+      console.error("DETAILED BACKEND ERROR:", err); // <--- This will tell you exactly why 401 is happening
+      res.status(401).json({ success: false, message: err.message });
+    }
   });
 
   router.get("/gettoken", authenticateJWT, (req, res) => {
