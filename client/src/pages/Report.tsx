@@ -24,7 +24,7 @@ import {
   parseISO,
   isBefore,
 } from "date-fns";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import axios from "../api/axios";
 import { Checkins } from "../types/Checkins";
 
